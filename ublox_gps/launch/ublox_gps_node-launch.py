@@ -35,26 +35,33 @@
 import os
 
 import ament_index_python.packages
-import launch
 import launch_ros.actions
+
+import launch
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
     config_directory = os.path.join(
-        ament_index_python.packages.get_package_share_directory('ublox_gps'),
-        'config')
-    params = os.path.join(config_directory, 'c94_m8p_rover.yaml')
-    ublox_gps_node = launch_ros.actions.Node(package='ublox_gps',
-                                             node_executable='ublox_gps_node',
-                                             output='both',
-                                             parameters=[params])
+        ament_index_python.packages.get_package_share_directory("ublox_gps"), "config"
+    )
+    params = os.path.join(config_directory, "c94_m8p_rover.yaml")
 
-    return launch.LaunchDescription([ublox_gps_node,
+    respawn = bool(int(os.getenv(key="RESPAWN_NODES", default=1)))
+    respawn_delay = float(os.getenv(key="RESPAWN_DELAY", default=5))
 
-                                     launch.actions.RegisterEventHandler(
-                                         event_handler=launch.event_handlers.OnProcessExit(
-                                             target_action=ublox_gps_node,
-                                             on_exit=[launch.actions.EmitEvent(
-                                                 event=launch.events.Shutdown())],
-                                         )),
-                                     ])
+    ublox_gps_node = launch_ros.actions.Node(
+        package="ublox_gps",
+        node_executable="ublox_gps_node",
+        output="both",
+        parameters=[params],
+        respawn=respawn,
+        respawn_delay=respawn_delay,
+    )
+
+    return launch.LaunchDescription(
+        [
+            ublox_gps_node,
+        ]
+    )
