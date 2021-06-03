@@ -53,7 +53,7 @@ def generate_launch_description():
 
     ublox_gps_node = launch_ros.actions.Node(
         package="ublox_gps",
-        node_executable="ublox_gps_node",
+        executable="ublox_gps_node",
         output="both",
         parameters=[params],
         respawn=respawn,
