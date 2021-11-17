@@ -219,6 +219,11 @@ void Gps::resetSerial(const std::string & port) {
   configured_ = true;
 }
 
+bool Gps::sendRtcm(const std::vector<uint8_t>& rtcm){
+  worker_->send(rtcm.data(), rtcm.size());
+  return true;
+}
+
 void Gps::initializeTcp(const std::string & host, const std::string & port) {
   host_ = host;
   port_ = port;
