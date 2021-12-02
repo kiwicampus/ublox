@@ -6,7 +6,7 @@ ublox_gps_node:
     save:
       mask: 3103                # Save I/O, Message, INF Message, Nav, Receiver
                                 # Manager, Antenna, and Logging Configuration
-      device: 4                 # Save to EEPROM
+      device: 3                 # Save to FLASH and BBR
 
     device: /dev/ttyACM0
     frame_id: gps
@@ -19,22 +19,7 @@ ublox_gps_node:
                                 # Max Horizontal Velocity: 250 m/s,
                                 # Max Vertical Velocity: 100 m/s
     fix_mode: auto
-    enable_ppp: false           # Not supported by C94-M8P
-    dr_limit: 0
-
-    # TMODE3 Config
-    tmode3: 0                   # Survey-In Mode
-    sv_in:
-      reset: false              # True: disables and re-enables survey-in (resets)
-                                # False: Disables survey-in only if TMODE3 is
-                                # disabled
-      min_dur: 300              # Survey-In Minimum Duration [s]
-      acc_lim: 3.0              # Survey-In Accuracy Limit [m]
-
-    uart1:
-      baudrate: 9600           # C94-M8P specific
-      in: 32                    # RTCM 3
-      out: 0                    # No UART out for rover
+    enable_ppp: false  
 
     gnss:
       galileo: true
@@ -43,6 +28,17 @@ ublox_gps_node:
       qzss: false              # Supported by C94-M8P
 
     dgnss_mode: 3               # Fixed mode
+
+    tmode3: 0                   # Survey-In Mode
+    sv_in:
+      reset: false              # True: disables and re-enables survey-in (resets)
+                                # False: Disables survey-in only if TMODE3 is
+                                # disabled
+      min_dur: 300              # Survey-In Minimum Duration [s]
+      acc_lim: 3.0              # Survey-In Accuracy Limit [m]
+    
+    nmea:
+      high_prec: true
 
     inf:
       all: true                 # Whether to display all INF messages in console
