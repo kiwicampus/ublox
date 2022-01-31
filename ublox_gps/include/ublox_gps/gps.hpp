@@ -122,6 +122,12 @@ class Gps final {
   void resetSerial(const std::string & port);
 
   /**
+   * @brief Send rtcm correction message.
+   * @param message a vector with the rtcm binary data
+  */
+  bool sendRtcm(const std::vector<uint8_t> &message);
+
+  /**
    * @brief Closes the I/O port, and initiates save on shutdown procedure
    * if enabled.
    */

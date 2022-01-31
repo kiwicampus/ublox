@@ -530,6 +530,9 @@ void UbloxNode::getRosParams()
     {
         aid_hui_pub_ = this->create_publisher<ublox_msgs::msg::AidHUI>("aidhui", 1);
     }
+
+    rtcm_sub_ = this->create_subscription<ublox_msgs::msg::Rtcm>("/rtcm", 1, std::bind(&UbloxNode::rtcmCb, this, std::placeholders::_1));
+
 }
 
 void UbloxNode::pollMessages()
@@ -984,6 +987,12 @@ void UbloxNode::initialize()
     {
         shutdown();
     }
+}
+
+void UbloxNode::rtcmCb(const ublox_msgs::msg::Rtcm::SharedPtr msg){
+    rtcm_bytes_+= msg->message.size();
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 60000, "Sent %f Kb of rtcm data to the receiver so far", (float)rtcm_bytes_/1024.0f);
+    gps_->sendRtcm(msg->message);
 }
 
 void UbloxNode::shutdown()

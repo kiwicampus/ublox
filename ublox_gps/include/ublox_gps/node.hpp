@@ -41,6 +41,7 @@
 #include <ublox_msgs/msg/cfg_cfg.hpp>
 #include <ublox_msgs/msg/cfg_dat.hpp>
 #include <ublox_msgs/msg/inf.h>
+#include <ublox_msgs/msg/rtcm.hpp>
 // Ublox GPS includes
 #include <ublox_gps/component_interface.hpp>
 #include <ublox_gps/fix_diagnostic.hpp>
@@ -190,6 +191,12 @@ class UbloxNode final : public rclcpp::Node {
    */
   void configureInf();
 
+  /**
+   * @brief Callback to send rtcm_msgs.
+   * @param msg the rtcm message
+   */
+  void rtcmCb(const ublox_msgs::msg::Rtcm::SharedPtr msg);
+
   //! The u-blox node components
   /*!
    * The node will call the functions in these interfaces for each object
@@ -241,6 +248,8 @@ class UbloxNode final : public rclcpp::Node {
   ublox_msgs::msg::CfgCFG save_;
   //! rate for TIM-TM2
   uint8_t tim_rate_{0};
+  //! total RTCM bytes sent
+  long int rtcm_bytes_{0};
 
   //! raw data stream logging
   std::shared_ptr<RawDataStreamPa> raw_data_stream_pa_;
@@ -251,6 +260,8 @@ class UbloxNode final : public rclcpp::Node {
   rclcpp::Publisher<ublox_msgs::msg::AidALM>::SharedPtr aid_alm_pub_;
   rclcpp::Publisher<ublox_msgs::msg::AidEPH>::SharedPtr aid_eph_pub_;
   rclcpp::Publisher<ublox_msgs::msg::AidHUI>::SharedPtr aid_hui_pub_;
+
+  rclcpp::Subscription<ublox_msgs::msg::Rtcm>::SharedPtr rtcm_sub_;
 
   //! Navigation rate in measurement cycles, see CfgRate.msg
   uint16_t nav_rate_{0};
