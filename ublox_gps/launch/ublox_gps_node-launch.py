@@ -46,7 +46,7 @@ def generate_launch_description():
     config_directory = os.path.join(
         ament_index_python.packages.get_package_share_directory("ublox_gps"), "config"
     )
-    params = os.path.join(config_directory, "rover.yaml")
+    params = os.path.join(config_directory, "base.yaml")
 
     respawn = bool(int(os.getenv(key="RESPAWN_NODES", default=1)))
     respawn_delay = float(os.getenv(key="RESPAWN_DELAY", default=5))

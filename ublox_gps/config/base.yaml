@@ -1,0 +1,86 @@
+# Configuration Settings for ublox device
+ublox_gps_node:
+  ros__parameters:
+    debug: 1                    # Range 0-4 (0 means no debug statements will print)
+
+    save:
+      mask: 3103                # Save I/O, Message, INF Message, Nav, Receiver
+                                # Manager, Antenna, and Logging Configuration
+      device: 3                 # Save to EEPROM
+
+    device: /dev/ttyACM0
+    frame_id: gps_base
+    dynamic_model: stationary   # Velocity restricted to 0 m/s. Zero dynamics
+                                # assumed.
+    fix_mode: auto
+    dr_limit: 0
+    enable_ppp: false           # Not supported by C94-M8P
+
+    rate: 4.0                   # Measurement rate in Hz
+    nav_rate: 4                 # in number of measurement cycles
+
+    uart1:
+      baudrate: 19200           # C94-M8P specific
+      in: 0                     # RTCM 3
+      out: 0                    # No UART out for rover
+
+    usb:
+      in: 39                     # No UART in for base
+      out: 35                   # RTCM 3
+
+    # TMODE3 Config
+    tmode3: 2                   # Survey-In Mode
+    arp:
+      lla_flag: true
+      position: [6.209095606, -75.571536069, 0.01548425]
+      position_hp: [0, 0, 0]
+
+    # RTCM out config
+    rtcm:
+      ids: [5, 74, 77, 84, 87, 94, 97, 124, 127, 230]     # RTCM Messages to configure for Base station
+                                       # Enabled: GPS MSM7, GLONASS MSM7,
+                                       # GLONASS CP bias, Stationary RTK ref
+                                       # 0xF5 0x05 Stationary RTK reference station
+                                       # ARP
+                                       # 0xF5 0x4A GPS MSM4
+                                       # 0xF5 0x4D GPS MSM7
+                                       # 0xF5 0x54 GLONASS MSM4
+                                       # 0xF5 0x57 GLONASS MSM7
+                                       # 0xF5 0x7C BeiDou MSM4
+                                       # 0xF5 0x7F BeiDou MSM7
+                                       # 0xF5 0xE6 GLONASS code-phase biases
+                                       # 0xF5 0xFE Reference station PVT
+                                       #(u-blox proprietary RTCM Message)
+      rates: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]      # in number of navigation solutions, must match
+                                # nav_rate, except for 0xE6
+
+    dat:
+      set: false
+
+    # GNSS Config
+    gnss:
+      glonass: true             # Supported by C94-M8P
+      beidou: true             # Supported by C94-M8P
+      qzss: false               # Supported by C94-M8P
+
+    inf:
+      all: true                   # Whether to display all INF messages in console
+
+    # Enable u-blox message publishers
+    publish:
+      all: true
+      aid:
+        hui: false
+      nav:
+        posecef: false
+
+    raw_data_stream:
+      enable: true
+      publish: true
+
+
+raw_data_pa:
+  ros__parameters:
+    raw_data_stream:
+      enable: true
+      publish: true
