@@ -128,7 +128,7 @@ void RawDataStreamPa::initialize() {
       filename << time_struct.tm_hour;
       filename.width(2); filename.fill('0');
       filename << time_struct.tm_min ;
-      filename.width(0); filename << ".log";
+      filename.width(0); filename << ".ubx";
       file_name_ = file_dir_ + filename.str();
 
       try {
