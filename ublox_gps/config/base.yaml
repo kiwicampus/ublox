@@ -32,7 +32,7 @@ ublox_gps_node:
     tmode3: 2                   # Survey-In Mode
     arp:
       lla_flag: true
-      position: [6.209095606, -75.571536069, 0.01548425]
+      # position: [6.209095606, -75.571536069, 0.01548425]
       position_hp: [0, 0, 0]
 
     # RTCM out config
@@ -69,11 +69,13 @@ ublox_gps_node:
 
     # Enable u-blox message publishers
     publish:
-      all: true
+      all: false
       aid:
         hui: false
       nav:
         posecef: false
+      esf:
+        all: false
 
     raw_data_stream:
       enable: true

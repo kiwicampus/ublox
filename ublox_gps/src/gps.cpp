@@ -444,7 +444,7 @@ bool Gps::configTmode3Fixed(bool lla_flag,
   ublox_msgs::msg::CfgTMODE3 tmode3;
   tmode3.flags = ublox_msgs::msg::CfgTMODE3::FLAGS_MODE_FIXED & ublox_msgs::msg::CfgTMODE3::FLAGS_MODE_MASK;
   tmode3.flags |= lla_flag ? ublox_msgs::msg::CfgTMODE3::FLAGS_LLA : 0;
-
+  RCLCPP_INFO(logger_, "Configured with: latitude->%d, longitude->%d, altitude->%d", arp_position[0], arp_position[1], arp_position[2]);
   // Set position
   if (lla_flag) {
     // Convert from [deg] to [deg * 1e-7]
