@@ -2,17 +2,16 @@
 ublox_gps_node:
   ros__parameters:
     debug: 1                    # Range 0-4 (0 means no debug statements will print)
-
+​
     save:
       mask: 3103                # Save I/O, Message, INF Message, Nav, Receiver
                                 # Manager, Antenna, and Logging Configuration
       device: 3                 # Save to FLASH and BBR
-
+​
     device: /dev/ttyACM0
     frame_id: gps
-    # Set on the launch file with environment variables
-    # rate: 4.0                   # in Hz
-    # nav_rate: 4                 # [# of measurement cycles], recommended 1 Hz, may
+    rate: 9.0                   # in Hz
+    nav_rate: 3                 # [# of measurement cycles], recommended 1 Hz, may
                                 # be either 5 Hz (Dual constellation) or
                                 # 8 Hz (GPS only)
     dynamic_model: pedestrian     # Airborne < 2G, 2D fix not supported (3D only),
@@ -21,15 +20,15 @@ ublox_gps_node:
                                 # Max Vertical Velocity: 100 m/s
     fix_mode: auto
     enable_ppp: false  
-
+​
     gnss:
       galileo: true
       glonass: true             # Supported by C94-M8P
       beidou: true             # Supported by C94-M8P
       qzss: false              # Supported by C94-M8P
-
+​
     dgnss_mode: 3               # Fixed mode
-
+​
     tmode3: 0                   # Survey-In Mode
     sv_in:
       reset: false              # True: disables and re-enables survey-in (resets)
@@ -38,7 +37,7 @@ ublox_gps_node:
       min_dur: 300              # Survey-In Minimum Duration [s]
       acc_lim: 3.0              # Survey-In Accuracy Limit [m]
     
-
+​
       nmea:
         set: true
         version: 65
@@ -64,16 +63,16 @@ ublox_gps_node:
         main_talker_id: 1
         gsv_talker_id: 1
         bds_talker_id: [0,0]          # 
-
+​
     inf:
       all: true                 # Whether to display all INF messages in console
-
+​
     # Enable u-blox message publishers
     publish:
       all: true
       aid:
         hui: false
-
+​
       nav:
         posecef: false
         heading: true
