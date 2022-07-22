@@ -55,7 +55,13 @@ def generate_launch_description():
         package="ublox_gps",
         executable="ublox_gps_node",
         output="both",
-        parameters=[params],
+        parameters=[
+            params,
+            {
+                "rate": float(os.getenv("GPS_MEASUREMENT_RATE", 4.0)),
+                "nav_rate": int(os.getenv("GPS_MEASUREMENT_CYCLES", 4)),
+            },
+        ],
         respawn=respawn,
         respawn_delay=respawn_delay,
     )
