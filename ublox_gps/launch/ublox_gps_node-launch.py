@@ -69,5 +69,12 @@ def generate_launch_description():
     return launch.LaunchDescription(
         [
             ublox_gps_node,
+            # This stuff actually kill the whole launch file
+            # launch.actions.RegisterEventHandler(
+            #     event_handler=launch.event_handlers.OnProcessExit(
+            #         target_action=ublox_gps_node,
+            #         on_exit=[launch.actions.EmitEvent(event=launch.events.Shutdown())],
+            #     )
+            # ),
         ]
     )
