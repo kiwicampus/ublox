@@ -40,9 +40,12 @@ import launch_ros.actions
 import launch
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
+from launch.conditions import IfCondition
 
 
 def generate_launch_description():
+    dual_gps = LaunchConfiguration("dual_gps")
+
     config_directory = os.path.join(
         ament_index_python.packages.get_package_share_directory("ublox_gps"), "config"
     )
@@ -60,15 +63,54 @@ def generate_launch_description():
             {
                 "rate": float(os.getenv("GPS_MEASUREMENT_RATE", 4.0)),
                 "nav_rate": int(os.getenv("GPS_MEASUREMENT_CYCLES", 4)),
+                "device": os.getenv("GPS_PORT", "/dev/ttyACM0"),
             },
         ],
         respawn=respawn,
         respawn_delay=respawn_delay,
     )
 
+    second_ublox_gps_node = launch_ros.actions.Node(
+        package="ublox_gps",
+        executable="ublox_gps_node",
+        output="both",
+        parameters=[
+            params,
+            {
+                "rate": float(os.getenv("GPS_MEASUREMENT_RATE", 4.0)),
+                "nav_rate": int(os.getenv("GPS_MEASUREMENT_CYCLES", 4)),
+                "device": os.getenv("SECOND_GPS_PORT", "/dev/ttyACM1"),
+            },
+        ],
+        remappings=[
+            ("/aidalm", "/aidalm2"),
+            ("/aideph", "/aideph2"),
+            ("/diagnostics", "/diagnostics2"),
+            ("/fix", "/fix2"),
+            ("/fix_velocity", "/fix_velocity2"),
+            ("/monhw", "/monhw2"),
+            ("/navclock", "/navclock2"),
+            ("/navheading", "/navheading2"),
+            ("/navpvt", "/navpvt2"),
+            ("/navrelposned", "/navrelposned2"),
+            ("/navstate", "/navstate2"),
+            ("/navstatus", "/navstatus2"),
+            ("/navsvin", "/navsvin2"),
+        ],
+        respawn=respawn,
+        respawn_delay=respawn_delay,
+        condition=IfCondition(dual_gps),
+    )
+
     return launch.LaunchDescription(
         [
+            DeclareLaunchArgument(
+                "dual_gps",
+                default_value="False",
+                description="Whether to launch a second gps",
+            ),
             ublox_gps_node,
+            second_ublox_gps_node,
             # This stuff actually kill the whole launch file
             # launch.actions.RegisterEventHandler(
             #     event_handler=launch.event_handlers.OnProcessExit(

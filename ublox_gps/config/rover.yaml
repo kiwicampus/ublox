@@ -8,7 +8,7 @@ ublox_gps_node:
                                 # Manager, Antenna, and Logging Configuration
       device: 3                 # Save to FLASH and BBR
 
-    device: /dev/ttyACM0
+    # device: /dev/ttyACM0
     frame_id: gps
     # Set on the launch file with environment variables
     # rate: 4.0                   # in Hz
