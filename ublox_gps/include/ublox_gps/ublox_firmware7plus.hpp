@@ -38,6 +38,22 @@ class UbloxFirmware7Plus : public UbloxFirmware {
       nav_pvt_pub_ = node_->create_publisher<NavPVT>("/navpvt", 1);
     }
 
+    // parameter to change the covariance calculation.
+    // set covariance_type=1 to inflate covariance variables following the equation
+    // inflated_covariance = 16*read_covariance**0.75. This is because gps are not very good
+    // at estimating their own error, sometimes they may report cm-level accuracy while producing
+    // a reading several meters off their actual position
+    // set it to any other value to just forward the raw covariance from the gps
+    if(!getRosUint(node_, "covariance_type", covariance_type_))
+    {
+      RCLCPP_INFO(node_->get_logger(), "Covariance type not set, using default type");
+    }
+    else if(std::find(valid_covariance_types.begin(), valid_covariance_types.end(), covariance_type_) == valid_covariance_types.end())
+    {
+      RCLCPP_INFO(node_->get_logger(), "Invalid covariance type: %i, using default type", covariance_type_);
+      covariance_type_ = 0;
+    }
+
     fix_pub_ =
         node_->create_publisher<sensor_msgs::msg::NavSatFix>("/fix", 1);
     vel_pub_ =
@@ -104,11 +120,28 @@ class UbloxFirmware7Plus : public UbloxFirmware {
     // Set the position covariance
     const double var_h = pow(m.h_acc / 1000.0, 2); // to [m^2]
     const double var_v = pow(m.v_acc / 1000.0, 2); // to [m^2]
-    fix.position_covariance[0] = var_h;
-    fix.position_covariance[4] = var_h;
-    fix.position_covariance[8] = var_v;
-    fix.position_covariance_type =
+    switch (covariance_type_)
+    {
+    case 1:
+      // If we want to inflate the covariance. This is because gps are not very good
+      // at estimating their own error, sometimes they may report cm-level accuracy while producing
+      // a reading several meters off their actual position. Fusing a wrong measurement with a low 
+      // covariance to a kalman filter will cause the state estimate to deviate significantly
+      fix.position_covariance[0] = inflate_covariance(var_h);
+      fix.position_covariance[4] = inflate_covariance(var_h);
+      fix.position_covariance[8] = inflate_covariance(var_v);
+      fix.position_covariance_type =
+        sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_APPROXIMATED;
+      break;
+    
+    default:
+      fix.position_covariance[0] = var_h;
+      fix.position_covariance[4] = var_h;
+      fix.position_covariance[8] = var_v;
+      fix.position_covariance_type =
         sensor_msgs::msg::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;
+      break;
+    }
 
     fix_pub_->publish(fix);
 
@@ -189,6 +222,23 @@ class UbloxFirmware7Plus : public UbloxFirmware {
     stat.add("# SVs used", static_cast<int>(last_nav_pvt_.num_sv));
   }
 
+  /**
+   * @brief increase the GPS covariance with the following rules
+   * 1. No covariance can be less than 1m**2. This is because though the GPS can produce
+   * really good measurements with RTK, sometimes the same low covariance is reported
+   * for readings with more than 1m error. Since there is no way to tell when an RTK
+   * aided fix is good or is affected by multipath interference we rather just inflate
+   * the covariance artifically
+   * 2. Covariance is put at the power of 0.75 to make covariances lower than 1m**2 higher and
+   * Covariances higher than 1m**2 lower
+   * 3. Covariance is multiplied by 16 (meaning error is multiplied by 4) to further reduce the
+   * confidence of the measurement.
+   */
+  double inflate_covariance(double raw_covariance)
+  {
+    return std::max(1.0, 16*std::pow(raw_covariance, 0.75));
+  }
+
   //! The last received NavPVT message
   NavPVT last_nav_pvt_;
   // Whether or not to enable the given GNSS
@@ -207,6 +257,10 @@ class UbloxFirmware7Plus : public UbloxFirmware {
 
   std::string frame_id_;
   std::shared_ptr<FixDiagnostic> freq_diag_;
+
+  uint8_t covariance_type_;
+  std::vector<uint8_t> valid_covariance_types{0,1};
+
 };
 
 }  // namespace ublox_node
