@@ -259,6 +259,8 @@ class UbloxNode final : public rclcpp::Node {
   ublox_msgs::msg::CfgCFG save_;
   //! rate for TIM-TM2
   uint8_t tim_rate_{0};
+  //! total RTCM bytes sent
+  long int rtcm_bytes_{0};
 
   //! raw data stream logging
   std::shared_ptr<RawDataStreamPa> raw_data_stream_pa_;

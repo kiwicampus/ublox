@@ -90,39 +90,48 @@ namespace ublox_node {
  * @return DynamicModel
  * @throws std::runtime_error on invalid argument.
  */
-uint8_t modelFromString(const std::string& model) {
-  std::string lower = model;
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  if (lower == "portable") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_PORTABLE;
-  }
-  if (lower == "stationary") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_STATIONARY;
-  }
-  if (lower == "pedestrian") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_PEDESTRIAN;
-  }
-  if (lower == "automotive") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AUTOMOTIVE;
-  }
-  if (lower == "sea") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_SEA;
-  }
-  if (lower == "airborne1") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AIRBORNE_1G;
-  }
-  if (lower == "airborne2") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AIRBORNE_2G;
-  }
-  if (lower == "airborne4") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AIRBORNE_4G;
-  }
-  if (lower == "wristwatch") {
-    return ublox_msgs::msg::CfgNAV5::DYN_MODEL_WRIST_WATCH;
-  }
+uint8_t modelFromString(const std::string& model)
+{
+    std::string lower = model;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    if (lower == "portable")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_PORTABLE;
+    }
+    if (lower == "stationary")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_STATIONARY;
+    }
+    if (lower == "pedestrian")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_PEDESTRIAN;
+    }
+    if (lower == "automotive")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AUTOMOTIVE;
+    }
+    if (lower == "sea")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_SEA;
+    }
+    if (lower == "airborne1")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AIRBORNE_1G;
+    }
+    if (lower == "airborne2")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AIRBORNE_2G;
+    }
+    if (lower == "airborne4")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_AIRBORNE_4G;
+    }
+    if (lower == "wristwatch")
+    {
+        return ublox_msgs::msg::CfgNAV5::DYN_MODEL_WRIST_WATCH;
+    }
 
-  throw std::runtime_error("Invalid settings: " + lower +
-                           " is not a valid dynamic model.");
+    throw std::runtime_error("Invalid settings: " + lower + " is not a valid dynamic model.");
 }
 
 /**
@@ -134,66 +143,76 @@ uint8_t modelFromString(const std::string& model) {
  * @return FixMode
  * @throws std::runtime_error on invalid argument.
  */
-uint8_t fixModeFromString(const std::string& mode) {
-  std::string lower = mode;
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  if (lower == "2d") {
-    return ublox_msgs::msg::CfgNAV5::FIX_MODE_2D_ONLY;
-  }
-  if (lower == "3d") {
-    return ublox_msgs::msg::CfgNAV5::FIX_MODE_3D_ONLY;
-  }
-  if (lower == "auto") {
-    return ublox_msgs::msg::CfgNAV5::FIX_MODE_AUTO;
-  }
+uint8_t fixModeFromString(const std::string& mode)
+{
+    std::string lower = mode;
+    std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+    if (lower == "2d")
+    {
+        return ublox_msgs::msg::CfgNAV5::FIX_MODE_2D_ONLY;
+    }
+    if (lower == "3d")
+    {
+        return ublox_msgs::msg::CfgNAV5::FIX_MODE_3D_ONLY;
+    }
+    if (lower == "auto")
+    {
+        return ublox_msgs::msg::CfgNAV5::FIX_MODE_AUTO;
+    }
 
-  throw std::runtime_error("Invalid settings: " + mode +
-                           " is not a valid fix mode.");
+    throw std::runtime_error("Invalid settings: " + mode + " is not a valid fix mode.");
 }
 
-std::vector<std::string> stringSplit(const std::string &str,
-                                     const std::string &splitter) {
-  std::vector<std::string> ret;
-  size_t next = 0;
-  size_t current = next;
+std::vector<std::string> stringSplit(const std::string& str, const std::string& splitter)
+{
+    std::vector<std::string> ret;
+    size_t next = 0;
+    size_t current = next;
 
-  if (splitter.empty()) {
-    // If the splitter is blank, just return the original
-    ret.push_back(str);
+    if (splitter.empty())
+    {
+        // If the splitter is blank, just return the original
+        ret.push_back(str);
+        return ret;
+    }
+
+    while (next != std::string::npos)
+    {
+        next = str.find(splitter, current);
+        ret.push_back(str.substr(current, next - current));
+        current = next + splitter.length();
+    }
+
     return ret;
-  }
-
-  while (next != std::string::npos) {
-    next = str.find(splitter, current);
-    ret.push_back(str.substr(current, next - current));
-    current = next + splitter.length();
-  }
-
-  return ret;
 }
 
 //
 // u-blox ROS Node
 //
-UbloxNode::UbloxNode(const rclcpp::NodeOptions & options) : rclcpp::Node("ublox_gps_node", options) {
-  int debug = this->declare_parameter("debug", 1);
-  if (debug) {
-    if (rcutils_logging_set_logger_level("ublox_gps_node", RCUTILS_LOG_SEVERITY_DEBUG) != RCUTILS_RET_OK) {
-      RCLCPP_WARN(this->get_logger(), "Failed to set the debugging level");
+UbloxNode::UbloxNode(const rclcpp::NodeOptions& options) : rclcpp::Node("ublox_gps_node", options)
+{
+    int debug = this->declare_parameter("debug", 1);
+    if (debug)
+    {
+        if (rcutils_logging_set_logger_level("ublox_gps_node", RCUTILS_LOG_SEVERITY_DEBUG) != RCUTILS_RET_OK)
+        {
+            RCLCPP_WARN(this->get_logger(), "Failed to set the debugging level");
+        }
     }
-  }
 
-  gps_ = std::make_shared<ublox_gps::Gps>(debug, this->get_logger());
+    gps_ = std::make_shared<ublox_gps::Gps>(debug, this->get_logger());
 
-  gnss_ = std::make_shared<Gnss>();
+    gnss_ = std::make_shared<Gnss>();
 
-  updater_ = std::make_shared<diagnostic_updater::Updater>(this);
-  updater_->setHardwareID("ublox");
+    updater_ = std::make_shared<diagnostic_updater::Updater>(this);
+    updater_->setHardwareID("ublox");
 
-  initialize();
+    initialize();
 }
 
 void UbloxNode::rtcmCallback(const rtcm_msgs::msg::Message::SharedPtr msg) {
+  rtcm_bytes_+= msg->message.size();
+  RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 60000, "Sent %f Kb of rtcm data to the receiver so far", (float)rtcm_bytes_/1024.0f);
   gps_->sendRtcm(msg->message);
 }
 
@@ -213,7 +232,7 @@ void UbloxNode::addFirmwareInterface() {
     ublox_version = 9;
   }
 
-  RCLCPP_INFO(this->get_logger(), "U-Blox Firmware Version: %d", ublox_version);
+    RCLCPP_INFO(this->get_logger(), "U-Blox Firmware Version: %d", ublox_version);
 }
 
 
@@ -525,37 +544,49 @@ void UbloxNode::pollMessages() {
   }
 }
 
-void UbloxNode::printInf(const ublox_msgs::msg::Inf &m, uint8_t id) {
-  if (id == ublox_msgs::Message::INF::ERROR) {
-    RCLCPP_ERROR(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
-  } else if (id == ublox_msgs::Message::INF::WARNING) {
-    RCLCPP_WARN(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
-  } else if (id == ublox_msgs::Message::INF::DEBUG) {
-    RCLCPP_DEBUG(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
-  } else {
-    RCLCPP_INFO(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
-  }
+void UbloxNode::printInf(const ublox_msgs::msg::Inf& m, uint8_t id)
+{
+    if (id == ublox_msgs::Message::INF::ERROR)
+    {
+        RCLCPP_ERROR(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
+    }
+    else if (id == ublox_msgs::Message::INF::WARNING)
+    {
+        RCLCPP_WARN(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
+    }
+    else if (id == ublox_msgs::Message::INF::DEBUG)
+    {
+        RCLCPP_DEBUG(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
+    }
+    else
+    {
+        RCLCPP_INFO(this->get_logger(), "INF: %s", std::string(m.str.begin(), m.str.end()).c_str());
+    }
 }
 
-void UbloxNode::subscribe() {
-  RCLCPP_DEBUG(this->get_logger(), "Subscribing to U-Blox messages");
-  // subscribe messages
+void UbloxNode::subscribe()
+{
+    RCLCPP_DEBUG(this->get_logger(), "Subscribing to U-Blox messages");
+    // subscribe messages
 
-  // Nav Messages
-  if (getRosBoolean(this, "publish.nav.status")) {
-    gps_->subscribe<ublox_msgs::msg::NavSTATUS>([this](const ublox_msgs::msg::NavSTATUS &m) { nav_status_pub_->publish(m); },
-                                           1);
-  }
+    // Nav Messages
+    if (getRosBoolean(this, "publish.nav.status"))
+    {
+        gps_->subscribe<ublox_msgs::msg::NavSTATUS>(
+            [this](const ublox_msgs::msg::NavSTATUS& m) { nav_status_pub_->publish(m); }, 1);
+    }
 
-  if (getRosBoolean(this, "publish.nav.posecef")) {
-    gps_->subscribe<ublox_msgs::msg::NavPOSECEF>([this](const ublox_msgs::msg::NavPOSECEF &m) { nav_posecef_pub_->publish(m); },
-                                            1);
-  }
+    if (getRosBoolean(this, "publish.nav.posecef"))
+    {
+        gps_->subscribe<ublox_msgs::msg::NavPOSECEF>(
+            [this](const ublox_msgs::msg::NavPOSECEF& m) { nav_posecef_pub_->publish(m); }, 1);
+    }
 
-  if (getRosBoolean(this, "publish.nav.clock")) {
-    gps_->subscribe<ublox_msgs::msg::NavCLOCK>([this](const ublox_msgs::msg::NavCLOCK &m) { nav_clock_pub_->publish(m); },
-                                          1);
-  }
+    if (getRosBoolean(this, "publish.nav.clock"))
+    {
+        gps_->subscribe<ublox_msgs::msg::NavCLOCK>(
+            [this](const ublox_msgs::msg::NavCLOCK& m) { nav_clock_pub_->publish(m); }, 1);
+    }
 
   if (getRosBoolean(this, "publish.nav.cov")) {
     gps_->subscribe<ublox_msgs::msg::NavCOV>([this](const ublox_msgs::msg::NavCOV &m) { nav_cov_pub_->publish(m); },
@@ -570,49 +601,52 @@ void UbloxNode::subscribe() {
         ublox_msgs::Message::INF::DEBUG);
   }
 
-  if (getRosBoolean(this, "inf.error")) {
-    gps_->subscribeId<ublox_msgs::msg::Inf>(
-        std::bind(&UbloxNode::printInf, this, std::placeholders::_1,
-                    ublox_msgs::Message::INF::ERROR),
-        ublox_msgs::Message::INF::ERROR);
-  }
+    if (getRosBoolean(this, "inf.error"))
+    {
+        gps_->subscribeId<ublox_msgs::msg::Inf>(
+            std::bind(&UbloxNode::printInf, this, std::placeholders::_1, ublox_msgs::Message::INF::ERROR),
+            ublox_msgs::Message::INF::ERROR);
+    }
 
-  if (getRosBoolean(this, "inf.notice")) {
-    gps_->subscribeId<ublox_msgs::msg::Inf>(
-        std::bind(&UbloxNode::printInf, this, std::placeholders::_1,
-                    ublox_msgs::Message::INF::NOTICE),
-        ublox_msgs::Message::INF::NOTICE);
-  }
+    if (getRosBoolean(this, "inf.notice"))
+    {
+        gps_->subscribeId<ublox_msgs::msg::Inf>(
+            std::bind(&UbloxNode::printInf, this, std::placeholders::_1, ublox_msgs::Message::INF::NOTICE),
+            ublox_msgs::Message::INF::NOTICE);
+    }
 
-  if (getRosBoolean(this, "inf.test")) {
-    gps_->subscribeId<ublox_msgs::msg::Inf>(
-        std::bind(&UbloxNode::printInf, this, std::placeholders::_1,
-                    ublox_msgs::Message::INF::TEST),
-        ublox_msgs::Message::INF::TEST);
-  }
+    if (getRosBoolean(this, "inf.test"))
+    {
+        gps_->subscribeId<ublox_msgs::msg::Inf>(
+            std::bind(&UbloxNode::printInf, this, std::placeholders::_1, ublox_msgs::Message::INF::TEST),
+            ublox_msgs::Message::INF::TEST);
+    }
 
-  if (getRosBoolean(this, "inf.warning")) {
-    gps_->subscribeId<ublox_msgs::msg::Inf>(
-        std::bind(&UbloxNode::printInf, this, std::placeholders::_1,
-                    ublox_msgs::Message::INF::WARNING),
-        ublox_msgs::Message::INF::WARNING);
-  }
+    if (getRosBoolean(this, "inf.warning"))
+    {
+        gps_->subscribeId<ublox_msgs::msg::Inf>(
+            std::bind(&UbloxNode::printInf, this, std::placeholders::_1, ublox_msgs::Message::INF::WARNING),
+            ublox_msgs::Message::INF::WARNING);
+    }
 
-  // AID messages
-  if (getRosBoolean(this, "publish.aid.alm")) {
-    gps_->subscribe<ublox_msgs::msg::AidALM>([this](const ublox_msgs::msg::AidALM &m) { aid_alm_pub_->publish(m); },
-                                        1);
-  }
+    // AID messages
+    if (getRosBoolean(this, "publish.aid.alm"))
+    {
+        gps_->subscribe<ublox_msgs::msg::AidALM>([this](const ublox_msgs::msg::AidALM& m) { aid_alm_pub_->publish(m); },
+                                                 1);
+    }
 
-  if (getRosBoolean(this, "publish.aid.eph")) {
-    gps_->subscribe<ublox_msgs::msg::AidEPH>([this](const ublox_msgs::msg::AidEPH &m) { aid_eph_pub_->publish(m); },
-                                        1);
-  }
+    if (getRosBoolean(this, "publish.aid.eph"))
+    {
+        gps_->subscribe<ublox_msgs::msg::AidEPH>([this](const ublox_msgs::msg::AidEPH& m) { aid_eph_pub_->publish(m); },
+                                                 1);
+    }
 
-  if (getRosBoolean(this, "publish.aid.hui")) {
-    gps_->subscribe<ublox_msgs::msg::AidHUI>([this](const ublox_msgs::msg::AidHUI &m) { aid_hui_pub_->publish(m); },
-                                        1);
-  }
+    if (getRosBoolean(this, "publish.aid.hui"))
+    {
+        gps_->subscribe<ublox_msgs::msg::AidHUI>([this](const ublox_msgs::msg::AidHUI& m) { aid_hui_pub_->publish(m); },
+                                                 1);
+    }
 
   if (getRosBoolean(this, "publish.nmea")) {
     gps_->subscribe_nmea([this](const std::string &sentence) {
@@ -629,204 +663,249 @@ void UbloxNode::subscribe() {
   }
 }
 
-void UbloxNode::initializeRosDiagnostics() {
-  for (const std::shared_ptr<ComponentInterface> & component : components_) {
-    component->initializeRosDiagnostics();
-  }
+void UbloxNode::initializeRosDiagnostics()
+{
+    for (const std::shared_ptr<ComponentInterface>& component : components_)
+    {
+        component->initializeRosDiagnostics();
+    }
 }
 
-void UbloxNode::processMonVer() {
-  ublox_msgs::msg::MonVER monVer;
-  if (!gps_->poll(monVer)) {
-    throw std::runtime_error("Failed to poll MonVER & set relevant settings");
-  }
-
-  RCLCPP_INFO(this->get_logger(), "%s, HW VER: %s",
-              std::string(monVer.sw_version.begin(), monVer.sw_version.end()).c_str(),
-              std::string(monVer.hw_version.begin(), monVer.hw_version.end()).c_str());
-  // Convert extension to vector of strings
-  std::vector<std::string> extensions;
-  extensions.reserve(monVer.extension.size());
-  for (std::size_t i = 0; i < monVer.extension.size(); ++i) {  // NOLINT(modernize-loop-convert)
-    RCLCPP_DEBUG(this->get_logger(), "%s",
-                 std::string(monVer.extension[i].field.begin(), monVer.extension[i].field.end()).c_str());
-    // Find the end of the string (null character)
-    unsigned char* end = std::find(monVer.extension[i].field.begin(),
-                                   monVer.extension[i].field.end(), '\0');
-    extensions.emplace_back(std::string(monVer.extension[i].field.begin(), end));
-  }
-
-  // Get the protocol version
-  for (const std::string & ext : extensions) {
-    std::size_t found = ext.find("PROTVER");
-    if (found != std::string::npos) {
-      const char * sub = ext.substr(8, ext.size()-8).c_str();
-      char * end{nullptr};
-      protocol_version_ = std::strtof(sub, &end);
-      if (protocol_version_ == HUGE_VALF || (protocol_version_ == 0 && end == sub)) {
-        // strtof failed to convert either via overflow or no conversion possible.
-        // Throw an error.
-        throw std::runtime_error("Failed to parse protocol version from extensions");
-      }
-      break;
+void UbloxNode::processMonVer()
+{
+    ublox_msgs::msg::MonVER monVer;
+    if (!gps_->poll(monVer))
+    {
+        throw std::runtime_error("Failed to poll MonVER & set relevant settings");
     }
-  }
-  if (protocol_version_ == 0.0) {
-    RCLCPP_WARN(this->get_logger(), "Failed to parse MonVER and determine protocol version. %s",
-                "Defaulting to firmware version 6.");
-  }
-  addFirmwareInterface();
 
-  if (protocol_version_ < 18.0) {
-    // Final line contains supported GNSS delimited by ;
-    std::vector<std::string> strs;
-    if (extensions.size() > 0) {
-      strs = stringSplit(extensions[extensions.size() - 1], ";");
+    RCLCPP_INFO(this->get_logger(), "%s, HW VER: %s",
+                std::string(monVer.sw_version.begin(), monVer.sw_version.end()).c_str(),
+                std::string(monVer.hw_version.begin(), monVer.hw_version.end()).c_str());
+    // Convert extension to vector of strings
+    std::vector<std::string> extensions;
+    extensions.reserve(monVer.extension.size());
+    for (std::size_t i = 0; i < monVer.extension.size(); ++i)
+    {  // NOLINT(modernize-loop-convert)
+        RCLCPP_DEBUG(this->get_logger(), "%s",
+                     std::string(monVer.extension[i].field.begin(), monVer.extension[i].field.end()).c_str());
+        // Find the end of the string (null character)
+        unsigned char* end = std::find(monVer.extension[i].field.begin(), monVer.extension[i].field.end(), '\0');
+        extensions.emplace_back(std::string(monVer.extension[i].field.begin(), end));
     }
-    for (const std::string & str : strs) {
-      gnss_->add(str);
-    }
-  } else {
-    for (std::size_t i = 0; i < extensions.size(); ++i) {
-      std::vector<std::string> strs;
-      // Up to 2nd to last line
-      if (i <= extensions.size() - 2) {
-        strs = stringSplit(extensions[i], "=");
-        if (strs.size() > 1) {
-          if (strs[0] == "FWVER") {
-            if (strs[1].length() > 8) {
-              addProductInterface(strs[1].substr(0, 3), strs[1].substr(8, 10));
-            } else {
-              addProductInterface(strs[1].substr(0, 3));
+
+    // Get the protocol version
+    for (const std::string& ext : extensions)
+    {
+        std::size_t found = ext.find("PROTVER");
+        if (found != std::string::npos)
+        {
+            const char* sub = ext.substr(8, ext.size() - 8).c_str();
+            char* end{nullptr};
+            protocol_version_ = std::strtof(sub, &end);
+            if (protocol_version_ == HUGE_VALF || (protocol_version_ == 0 && end == sub))
+            {
+                // strtof failed to convert either via overflow or no conversion possible.
+                // Throw an error.
+                throw std::runtime_error("Failed to parse protocol version from extensions");
             }
-            continue;
-          }
+            break;
         }
-      }
-      // Last 1-2 lines contain supported GNSS
-      if (i >= extensions.size() - 2) {
-        strs = stringSplit(extensions[i], ";");
-        for (const std::string & str : strs) {
-          gnss_->add(str);
-        }
-      }
     }
-  }
+    if (protocol_version_ == 0.0)
+    {
+        RCLCPP_WARN(this->get_logger(), "Failed to parse MonVER and determine protocol version. %s",
+                    "Defaulting to firmware version 6.");
+    }
+    addFirmwareInterface();
+
+    if (protocol_version_ < 18.0)
+    {
+        // Final line contains supported GNSS delimited by ;
+        std::vector<std::string> strs;
+        if (extensions.size() > 0)
+        {
+            strs = stringSplit(extensions[extensions.size() - 1], ";");
+        }
+        for (const std::string& str : strs)
+        {
+            gnss_->add(str);
+        }
+    }
+    else
+    {
+        for (std::size_t i = 0; i < extensions.size(); ++i)
+        {
+            std::vector<std::string> strs;
+            // Up to 2nd to last line
+            if (i <= extensions.size() - 2)
+            {
+                strs = stringSplit(extensions[i], "=");
+                if (strs.size() > 1)
+                {
+                    if (strs[0] == "FWVER")
+                    {
+                        if (strs[1].length() > 8)
+                        {
+                            addProductInterface(strs[1].substr(0, 3), strs[1].substr(8, 10));
+                        }
+                        else
+                        {
+                            addProductInterface(strs[1].substr(0, 3));
+                        }
+                        continue;
+                    }
+                }
+            }
+            // Last 1-2 lines contain supported GNSS
+            if (i >= extensions.size() - 2)
+            {
+                strs = stringSplit(extensions[i], ";");
+                for (const std::string& str : strs)
+                {
+                    gnss_->add(str);
+                }
+            }
+        }
+    }
 }
 
-bool UbloxNode::configureUblox() {
-  try {
-    if (!gps_->isInitialized()) {
-      throw std::runtime_error("Failed to initialize.");
-    }
-    if (load_.load_mask != 0) {
-      RCLCPP_DEBUG(this->get_logger(), "Loading u-blox configuration from memory. %u", load_.load_mask);
-      if (!gps_->configure(load_)) {
-        throw std::runtime_error(std::string("Failed to load configuration ") +
-                                 "from memory");
-      }
-      if (load_.load_mask & ublox_msgs::msg::CfgCFG::MASK_IO_PORT) {
-        RCLCPP_DEBUG(this->get_logger(), "Loaded I/O configuration from memory, resetting serial %s",
-          "communications.");
-        std::chrono::seconds wait(kResetWait);
-        gps_->reset(wait);
-        if (!gps_->isConfigured()) {
-          throw std::runtime_error(std::string("Failed to reset serial I/O") +
-            "after loading I/O configurations from device memory.");
+bool UbloxNode::configureUblox()
+{
+    try
+    {
+        if (!gps_->isInitialized())
+        {
+            throw std::runtime_error("Failed to initialize.");
         }
-      }
-    }
+        if (load_.load_mask != 0)
+        {
+            RCLCPP_DEBUG(this->get_logger(), "Loading u-blox configuration from memory. %u", load_.load_mask);
+            if (!gps_->configure(load_))
+            {
+                throw std::runtime_error(std::string("Failed to load configuration ") + "from memory");
+            }
+            if (load_.load_mask & ublox_msgs::msg::CfgCFG::MASK_IO_PORT)
+            {
+                RCLCPP_DEBUG(this->get_logger(), "Loaded I/O configuration from memory, resetting serial %s",
+                             "communications.");
+                std::chrono::seconds wait(kResetWait);
+                gps_->reset(wait);
+                if (!gps_->isConfigured())
+                {
+                    throw std::runtime_error(std::string("Failed to reset serial I/O") +
+                                             "after loading I/O configurations from device memory.");
+                }
+            }
+        }
 
-    if (getRosBoolean(this, "config_on_startup")) {
-      if (set_usb_) {
-        gps_->configUsb(usb_tx_, usb_in_, usb_out_);
-      }
-      if (!gps_->configRate(meas_rate_, nav_rate_)) {
-        std::stringstream ss;
-        ss << "Failed to set measurement rate to " << meas_rate_
-          << "ms and navigation rate to " << nav_rate_;
-        throw std::runtime_error(ss.str());
-      }
-      // If device doesn't have SBAS, will receive NACK (causes exception)
-      if (gnss_->isSupported("SBAS")) {
-        if (!gps_->configSbas(getRosBoolean(this, "gnss.sbas"), sbas_usage_, max_sbas_)) {
-          throw std::runtime_error(std::string("Failed to ") +
-                                  (getRosBoolean(this, "gnss.sbas") ? "enable" : "disable") +
-                                  " SBAS.");
+        if (getRosBoolean(this, "config_on_startup"))
+        {
+            if (set_usb_)
+            {
+                gps_->configUsb(usb_tx_, usb_in_, usb_out_);
+            }
+            if (!gps_->configRate(meas_rate_, nav_rate_))
+            {
+                std::stringstream ss;
+                ss << "Failed to set measurement rate to " << meas_rate_ << "ms and navigation rate to " << nav_rate_;
+                throw std::runtime_error(ss.str());
+            }
+            // If device doesn't have SBAS, will receive NACK (causes exception)
+            if (gnss_->isSupported("SBAS"))
+            {
+                if (!gps_->configSbas(getRosBoolean(this, "gnss.sbas"), sbas_usage_, max_sbas_))
+                {
+                    throw std::runtime_error(std::string("Failed to ") +
+                                             (getRosBoolean(this, "gnss.sbas") ? "enable" : "disable") + " SBAS.");
+                }
+            }
+            if (!gps_->setPpp(getRosBoolean(this, "enable_ppp")))
+            {
+                throw std::runtime_error(std::string("Failed to ") +
+                                         (getRosBoolean(this, "enable_ppp") ? "enable" : "disable") + " PPP.");
+            }
+            if (!gps_->setDynamicModel(dmodel_))
+            {
+                throw std::runtime_error("Failed to set model: " + dynamic_model_ + ".");
+            }
+            if (!gps_->setFixMode(fmode_))
+            {
+                throw std::runtime_error("Failed to set fix mode: " + fix_mode_ + ".");
+            }
+            if (!gps_->setDeadReckonLimit(dr_limit_))
+            {
+                std::stringstream ss;
+                ss << "Failed to set dead reckoning limit: " << dr_limit_ << ".";
+                throw std::runtime_error(ss.str());
+            }
+            if (getRosBoolean(this, "dat.set") && !gps_->configure(cfg_dat_))
+            {
+                throw std::runtime_error("Failed to set user-defined datum.");
+            }
+            // Configure each component
+            for (const std::shared_ptr<ComponentInterface>& component : components_)
+            {
+                if (!component->configureUblox(gps_))
+                {
+                    return false;
+                }
+            }
         }
-      }
-      if (!gps_->setPpp(getRosBoolean(this, "enable_ppp"))) {
-        throw std::runtime_error(std::string("Failed to ") +
-                                (getRosBoolean(this, "enable_ppp") ? "enable" : "disable")
-                                + " PPP.");
-      }
-      if (!gps_->setDynamicModel(dmodel_)) {
-        throw std::runtime_error("Failed to set model: " + dynamic_model_ + ".");
-      }
-      if (!gps_->setFixMode(fmode_)) {
-        throw std::runtime_error("Failed to set fix mode: " + fix_mode_ + ".");
-      }
-      if (!gps_->setDeadReckonLimit(dr_limit_)) {
-        std::stringstream ss;
-        ss << "Failed to set dead reckoning limit: " << dr_limit_ << ".";
-        throw std::runtime_error(ss.str());
-      }
-      if (getRosBoolean(this, "dat.set") && !gps_->configure(cfg_dat_)) {
-        throw std::runtime_error("Failed to set user-defined datum.");
-      }
-      // Configure each component
-      for (const std::shared_ptr<ComponentInterface> & component : components_) {
-        if (!component->configureUblox(gps_)) {
-          return false;
+        if (save_.save_mask != 0)
+        {
+            RCLCPP_DEBUG(this->get_logger(), "Saving the u-blox configuration, mask %u, device %u", save_.save_mask,
+                         save_.device_mask);
+            if (!gps_->configure(save_))
+            {
+                RCLCPP_ERROR(this->get_logger(), "u-blox unable to save configuration to non-volatile memory");
+            }
         }
-      }
+    } catch (const std::exception& e)
+    {
+        RCLCPP_FATAL(this->get_logger(), "Error configuring u-blox: %s", e.what());
+        return false;
     }
-    if (save_.save_mask != 0) {
-      RCLCPP_DEBUG(this->get_logger(), "Saving the u-blox configuration, mask %u, device %u",
-                   save_.save_mask, save_.device_mask);
-      if (!gps_->configure(save_)) {
-        RCLCPP_ERROR(this->get_logger(), "u-blox unable to save configuration to non-volatile memory");
-      }
-    }
-  } catch (const std::exception& e) {
-    RCLCPP_FATAL(this->get_logger(), "Error configuring u-blox: %s", e.what());
-    return false;
-  }
-  return true;
+    return true;
 }
 
-void UbloxNode::configureInf() {
-  ublox_msgs::msg::CfgINF msg;
-  // Subscribe to UBX INF messages
-  ublox_msgs::msg::CfgINFBlock block;
-  block.protocol_id = ublox_msgs::msg::CfgINFBlock::PROTOCOL_ID_UBX;
-  // Enable desired INF messages on each UBX port
-  uint8_t mask = (getRosBoolean(this, "inf.error") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_ERROR : 0) |
-                 (getRosBoolean(this, "inf.warning") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_WARNING : 0) |
-                 (getRosBoolean(this, "inf.notice") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_NOTICE : 0) |
-                 (getRosBoolean(this, "inf.test") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_TEST : 0) |
-                 (getRosBoolean(this, "inf.debug") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_DEBUG : 0);
-  for (size_t i = 0; i < block.inf_msg_mask.size(); i++) {  // NOLINT(modernize-loop-convert)
-    block.inf_msg_mask[i] = mask;
-  }
-
-  msg.blocks.push_back(block);
-
-  // IF NMEA is enabled
-  if (uart_in_ & ublox_msgs::msg::CfgPRT::PROTO_NMEA) {
+void UbloxNode::configureInf()
+{
+    ublox_msgs::msg::CfgINF msg;
+    // Subscribe to UBX INF messages
     ublox_msgs::msg::CfgINFBlock block;
-    block.protocol_id = ublox_msgs::msg::CfgINFBlock::PROTOCOL_ID_NMEA;
-    // Enable desired INF messages on each NMEA port
-    for (size_t i = 0; i < block.inf_msg_mask.size(); i++) {  // NOLINT(modernize-loop-convert)
-      block.inf_msg_mask[i] = mask;
+    block.protocol_id = ublox_msgs::msg::CfgINFBlock::PROTOCOL_ID_UBX;
+    // Enable desired INF messages on each UBX port
+    uint8_t mask = (getRosBoolean(this, "inf.error") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_ERROR : 0) |
+                   (getRosBoolean(this, "inf.warning") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_WARNING : 0) |
+                   (getRosBoolean(this, "inf.notice") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_NOTICE : 0) |
+                   (getRosBoolean(this, "inf.test") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_TEST : 0) |
+                   (getRosBoolean(this, "inf.debug") ? ublox_msgs::msg::CfgINFBlock::INF_MSG_DEBUG : 0);
+    for (size_t i = 0; i < block.inf_msg_mask.size(); i++)
+    {  // NOLINT(modernize-loop-convert)
+        block.inf_msg_mask[i] = mask;
     }
-    msg.blocks.push_back(block);
-  }
 
-  RCLCPP_DEBUG(this->get_logger(), "Configuring INF messages");
-  if (!gps_->configure(msg)) {
-    RCLCPP_WARN(this->get_logger(), "Failed to configure INF messages");
-  }
+    msg.blocks.push_back(block);
+
+    // IF NMEA is enabled
+    if (uart_in_ & ublox_msgs::msg::CfgPRT::PROTO_NMEA)
+    {
+        ublox_msgs::msg::CfgINFBlock block;
+        block.protocol_id = ublox_msgs::msg::CfgINFBlock::PROTOCOL_ID_NMEA;
+        // Enable desired INF messages on each NMEA port
+        for (size_t i = 0; i < block.inf_msg_mask.size(); i++)
+        {  // NOLINT(modernize-loop-convert)
+            block.inf_msg_mask[i] = mask;
+        }
+        msg.blocks.push_back(block);
+    }
+
+    RCLCPP_DEBUG(this->get_logger(), "Configuring INF messages");
+    if (!gps_->configure(msg))
+    {
+        RCLCPP_WARN(this->get_logger(), "Failed to configure INF messages");
+    }
 }
 
 void UbloxNode::initializeIo() {
@@ -906,18 +985,22 @@ void UbloxNode::initialize() {
     poller_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kPollDuration * 1000.0)),
                                       std::bind(&UbloxNode::pollMessages, this));
   }
-}
-
-void UbloxNode::shutdown() {
-  if (gps_->isInitialized()) {
-    gps_->close();
-    RCLCPP_INFO(this->get_logger(), "Closed connection to %s.", device_.c_str());
+  else {
+        shutdown();
   }
 }
 
-UbloxNode::~UbloxNode() {
-  shutdown();
+void UbloxNode::shutdown()
+{
+    if (gps_->isInitialized())
+    {
+        gps_->close();
+        RCLCPP_INFO(this->get_logger(), "Closed connection to %s.", device_.c_str());
+    }
+    rclcpp::shutdown();
 }
+
+UbloxNode::~UbloxNode() { shutdown(); }
 
 }  // namespace ublox_node
 
