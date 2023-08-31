@@ -229,14 +229,21 @@ class UbloxFirmware7Plus : public UbloxFirmware {
    * for readings with more than 1m error. Since there is no way to tell when an RTK
    * aided fix is good or is affected by multipath interference we rather just inflate
    * the covariance artifically
-   * 2. Covariance is put at the power of 0.75 to make covariances lower than 1m**2 higher and
-   * Covariances higher than 1m**2 lower
-   * 3. Covariance is multiplied by 16 (meaning error is multiplied by 4) to further reduce the
-   * confidence of the measurement.
+   * 2. a linear combination of factors is applied, the desired behavior is to inflate low 
+   * errors more but as error grows, make it equal to the raw error. with that in mind:
+   * A. a constant 0.5 is added. Proportionally this increases more low errors 
+   * B. the cubic root of the error is added. This makes low error values increase significantly
+   *    (1cm error would become 21cm error), but has less weight on higher error values
+   * C. the raw error is added. This dominates the function for high errors so that the return
+   *    value is fairly similar to the input value for big errors
    */
   double inflate_covariance(double raw_covariance)
   {
-    return std::max(1.0, 16*std::pow(raw_covariance, 0.75));
+    double acc = std::sqrt(raw_covariance);
+    acc = acc + 1.5 * std::pow(acc, 0.33) + 0.5;
+    raw_covariance = std::pow(acc, 2);
+    raw_covariance = std::max(1.0, raw_covariance);
+    return raw_covariance;
   }
 
   //! The last received NavPVT message

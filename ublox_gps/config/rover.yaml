@@ -22,19 +22,19 @@ ublox_gps_node:
     fix_mode: auto
     enable_ppp: false  
 
-    # We want to inflate the covariance. This is because gps are not very good
-    # at estimating their own error, sometimes they may report cm-level accuracy while producing
-    # a reading several meters off their actual position. Fusing a wrong measurement with a low 
-    # covariance to a kalman filter will cause the state estimate to deviate significantly
-    #  1. No covariance can be less than 1m**2. This is because though the GPS can produce
+    # We want to increase the GPS covariance with the following rules
+    # 1. No covariance can be less than 1m**2. This is because though the GPS can produce
     # really good measurements with RTK, sometimes the same low covariance is reported
     # for readings with more than 1m error. Since there is no way to tell when an RTK
     # aided fix is good or is affected by multipath interference we rather just inflate
     # the covariance artifically
-    # 2. Covariance is put at the power of 0.75 to make covariances lower than 1m**2 higher and
-    # Covariances higher than 1m**2 lower
-    # 3. Covariance is multiplied by 16 (meaning error is multiplied by 4) to further reduce the
-    # confidence of the measurement.
+    # 2. a linear combination of factors is applied, the desired behavior is to inflate low 
+    # errors more but as error grows, make it equal to the raw error. with that in mind:
+    # A. a constant 0.5 is added. Proportionally this increases more low errors 
+    # B. the cubic root of the error is added. This makes low error values increase significantly
+    #    (1cm error would become 21cm error), but has less weight on higher error values
+    # C. the raw error is added. This dominates the function for high errors so that the return
+    #    value is fairly similar to the input value for big errors
     covariance_type: 1
 
     gnss:
