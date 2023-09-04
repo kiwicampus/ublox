@@ -60,6 +60,7 @@ def generate_launch_description():
             {
                 "rate": float(os.getenv("GPS_MEASUREMENT_RATE", 4.0)),
                 "nav_rate": int(os.getenv("GPS_MEASUREMENT_CYCLES", 4)),
+                "covariance_type": int(os.getenv("GPS_COVARIANCE_TYPE", 0)),
             },
         ],
         respawn=respawn,

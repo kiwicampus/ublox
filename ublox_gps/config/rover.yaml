@@ -35,7 +35,9 @@ ublox_gps_node:
     #    (1cm error would become 21cm error), but has less weight on higher error values
     # C. the raw error is added. This dominates the function for high errors so that the return
     #    value is fairly similar to the input value for big errors
-    covariance_type: 1
+    
+    # Set on the launch file with environment variables
+    # covariance_type: 1
 
     gnss:
       galileo: true

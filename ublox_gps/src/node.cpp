@@ -265,6 +265,9 @@ void UbloxNode::getRosParams() {
   device_ = this->declare_parameter("device", std::string("/dev/ttyACM0"));
   frame_id_ = this->declare_parameter("frame_id", std::string("gps"));
 
+  // KIWI: Added parameter to inflate the covariance
+  this->declare_parameter("covariance_type", 0);
+
   // Save configuration parameters
   load_.load_mask = declareRosIntParameter<uint32_t>(this, "load.mask", 0);
   load_.device_mask = declareRosIntParameter<uint8_t>(this, "load.device", 0);

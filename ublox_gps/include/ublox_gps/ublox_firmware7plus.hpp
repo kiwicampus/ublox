@@ -47,6 +47,7 @@ class UbloxFirmware7Plus : public UbloxFirmware {
     if(!getRosUint(node_, "covariance_type", covariance_type_))
     {
       RCLCPP_INFO(node_->get_logger(), "Covariance type not set, using default type");
+      covariance_type_ = 0;
     }
     else if(std::find(valid_covariance_types.begin(), valid_covariance_types.end(), covariance_type_) == valid_covariance_types.end())
     {
