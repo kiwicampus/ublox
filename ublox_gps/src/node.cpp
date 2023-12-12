@@ -272,7 +272,8 @@ void UbloxNode::addProductInterface(const std::string& product_category, const s
     }
 }
 
-void UbloxNode::getRosParams() {
+void UbloxNode::getRosParams()
+{
     device_ = this->declare_parameter("device", std::string("/dev/ttyACM0"));
     frame_id_ = this->declare_parameter("frame_id", std::string("gps"));
 
@@ -284,24 +285,25 @@ void UbloxNode::getRosParams() {
 
     // UART 1 params
     baudrate_ = declareRosIntParameter<uint32_t>(this, "uart1.baudrate", 9600);
-    uart_in_ = declareRosIntParameter<uint16_t>(this, "uart1.in", ublox_msgs::msg::CfgPRT::PROTO_UBX
-                                              | ublox_msgs::msg::CfgPRT::PROTO_NMEA
-                                              | ublox_msgs::msg::CfgPRT::PROTO_RTCM);
+    uart_in_ = declareRosIntParameter<uint16_t>(
+        this, "uart1.in",
+        ublox_msgs::msg::CfgPRT::PROTO_UBX | ublox_msgs::msg::CfgPRT::PROTO_NMEA | ublox_msgs::msg::CfgPRT::PROTO_RTCM);
     uart_out_ = declareRosIntParameter<uint16_t>(this, "uart1.out", ublox_msgs::msg::CfgPRT::PROTO_UBX);
     // USB params
     set_usb_ = false;
     this->declare_parameter("usb.in", rclcpp::PARAMETER_INTEGER);
     this->declare_parameter("usb.out", rclcpp::PARAMETER_INTEGER);
     usb_tx_ = declareRosIntParameter<uint16_t>(this, "usb.tx_ready", 0);
-    if (isRosParameterSet(this, "usb.in") || isRosParameterSet(this, "usb.out")) {
+    if (isRosParameterSet(this, "usb.in") || isRosParameterSet(this, "usb.out"))
+    {
         set_usb_ = true;
-        if (!getRosUint(this, "usb.in", usb_in_)) {
-            throw std::runtime_error(std::string("usb.out is set, therefore ") +
-                               "usb.in must be set");
+        if (!getRosUint(this, "usb.in", usb_in_))
+        {
+            throw std::runtime_error(std::string("usb.out is set, therefore ") + "usb.in must be set");
         }
-        if (!getRosUint(this, "usb.out", usb_out_)) {
-            throw std::runtime_error(std::string("usb.in is set, therefore ") +
-                               "usb.out must be set");
+        if (!getRosUint(this, "usb.out", usb_out_))
+        {
+            throw std::runtime_error(std::string("usb.in is set, therefore ") + "usb.out must be set");
         }
     }
     // Measurement rate params
@@ -318,17 +320,20 @@ void UbloxNode::getRosParams() {
     this->get_parameter("rtcm.ids", rtcm_ids);
     this->get_parameter("rtcm.rates", rtcm_rates);
 
-    if (rtcm_ids.size() != rtcm_rates.size()) {
-        throw std::runtime_error(std::string("Invalid settings: size of rtcm_ids") +
-                             " must match size of rtcm_rates");
+    if (rtcm_ids.size() != rtcm_rates.size())
+    {
+        throw std::runtime_error(std::string("Invalid settings: size of rtcm_ids") + " must match size of rtcm_rates");
     }
 
     rtcms_.resize(rtcm_ids.size());
-    for (size_t i = 0; i < rtcm_ids.size(); ++i) {
-        if (rtcm_ids[i] < 0 || rtcm_ids[i] > 255) {
+    for (size_t i = 0; i < rtcm_ids.size(); ++i)
+    {
+        if (rtcm_ids[i] < 0 || rtcm_ids[i] > 255)
+        {
             throw std::runtime_error("RTCM IDs must be between 0 and 255");
         }
-        if (rtcm_rates[i] < 0 || rtcm_rates[i] > 255) {
+        if (rtcm_rates[i] < 0 || rtcm_rates[i] > 255)
+        {
             throw std::runtime_error("RTCM rates must be between 0 and 255");
         }
         rtcms_[i].id = rtcm_ids[i];
@@ -337,7 +342,8 @@ void UbloxNode::getRosParams() {
 
     // PPP: Advanced Setting
     this->declare_parameter("enable_ppp", false);
-    if (getRosBoolean(this, "enable_ppp")) {
+    if (getRosBoolean(this, "enable_ppp"))
+    {
         RCLCPP_WARN(this->get_logger(), "Warning: PPP is enabled - this is an expert setting.");
     }
 
@@ -349,14 +355,13 @@ void UbloxNode::getRosParams() {
     this->declare_parameter("gnss.galileo", false);
     this->declare_parameter("gnss.beidou", false);
     this->declare_parameter("gnss.imes", false);
-    max_sbas_ = declareRosIntParameter<uint8_t>(this, "sbas.max", 0); // Maximum number of SBAS channels
+    max_sbas_ = declareRosIntParameter<uint8_t>(this, "sbas.max", 0);  // Maximum number of SBAS channels
     sbas_usage_ = declareRosIntParameter<uint8_t>(this, "sbas.usage", 0);
     dynamic_model_ = this->declare_parameter("dynamic_model", std::string("portable"));
     dmodel_ = modelFromString(dynamic_model_);
     fix_mode_ = this->declare_parameter("fix_mode", std::string("auto"));
     fmode_ = fixModeFromString(fix_mode_);
-    dr_limit_ = declareRosIntParameter<uint8_t>(this, "dr_limit", 0); // Dead reckoning limit
-
+    dr_limit_ = declareRosIntParameter<uint8_t>(this, "dr_limit", 0);  // Dead reckoning limit
 
     this->declare_parameter("dat.set", false);
     this->declare_parameter("dat.majA", rclcpp::PARAMETER_DOUBLE);
@@ -364,19 +369,19 @@ void UbloxNode::getRosParams() {
     this->declare_parameter("dat.shift", rclcpp::PARAMETER_DOUBLE_ARRAY);
     this->declare_parameter("dat.rot", rclcpp::PARAMETER_DOUBLE_ARRAY);
     this->declare_parameter("dat.scale", rclcpp::PARAMETER_DOUBLE);
-    if (getRosBoolean(this, "dat.set")) {
+    if (getRosBoolean(this, "dat.set"))
+    {
         std::vector<double> shift, rot;
-        if (!this->get_parameter("dat.majA", cfg_dat_.maj_a)
-        || !this->get_parameter("dat.flat", cfg_dat_.flat)
-        || !this->get_parameter("dat.shift", shift)
-        || !this->get_parameter("dat.rot", rot)
-        || !this->get_parameter("dat.scale", cfg_dat_.scale)) {
+        if (!this->get_parameter("dat.majA", cfg_dat_.maj_a) || !this->get_parameter("dat.flat", cfg_dat_.flat) ||
+            !this->get_parameter("dat.shift", shift) || !this->get_parameter("dat.rot", rot) ||
+            !this->get_parameter("dat.scale", cfg_dat_.scale))
+        {
             throw std::runtime_error(std::string("dat.set is true, therefore ") +
                                      "dat.majA, dat.flat, dat.shift, dat.rot, & dat.scale must be set");
         }
-        if (shift.size() != 3 || rot.size() != 3) {
-            throw std::runtime_error(std::string("size of dat.shift & dat.rot ") +
-                               "must be 3");
+        if (shift.size() != 3 || rot.size() != 3)
+        {
+            throw std::runtime_error(std::string("size of dat.shift & dat.rot ") + "must be 3");
         }
         checkRange(cfg_dat_.maj_a, 6300000.0, 6500000.0, "dat.majA");
         checkRange(cfg_dat_.flat, 0.0, 500.0, "dat.flat");
@@ -412,9 +417,10 @@ void UbloxNode::getRosParams() {
 
     // raw data stream logging
     this->declare_parameter("raw_data_stream.enable", false);
-    if (getRosBoolean(this, "raw_data_stream.enable")) {
-        raw_data_stream_pa_ = std::make_shared<ublox_node::RawDataStreamPa>(
-      getRosBoolean(this, "raw_data_stream.enable"));
+    if (getRosBoolean(this, "raw_data_stream.enable"))
+    {
+        raw_data_stream_pa_ =
+            std::make_shared<ublox_node::RawDataStreamPa>(getRosBoolean(this, "raw_data_stream.enable"));
         raw_data_stream_pa_->getRosParams();
     }
 
@@ -499,50 +505,64 @@ void UbloxNode::getRosParams() {
     this->declare_parameter("diagnostic_period", kDiagnosticPeriod);
 
     // Create publishers based on parameters
-    if (getRosBoolean(this, "publish.nav.status")) {
+    if (getRosBoolean(this, "publish.nav.status"))
+    {
         nav_status_pub_ = this->create_publisher<ublox_msgs::msg::NavSTATUS>("navstatus", 1);
     }
-    if (getRosBoolean(this, "publish.nav.posecef")) {
+    if (getRosBoolean(this, "publish.nav.posecef"))
+    {
         nav_posecef_pub_ = this->create_publisher<ublox_msgs::msg::NavPOSECEF>("navposecef", 1);
     }
-    if (getRosBoolean(this, "publish.nav.clock")) {
+    if (getRosBoolean(this, "publish.nav.clock"))
+    {
         nav_clock_pub_ = this->create_publisher<ublox_msgs::msg::NavCLOCK>("navclock", 1);
     }
-    if (getRosBoolean(this, "publish.nav.clock")) {
+    if (getRosBoolean(this, "publish.nav.clock"))
+    {
         nav_clock_pub_ = this->create_publisher<ublox_msgs::msg::NavCLOCK>("navclock", 1);
     }
-    if (getRosBoolean(this, "publish.aid.alm")) {
+    if (getRosBoolean(this, "publish.aid.alm"))
+    {
         aid_alm_pub_ = this->create_publisher<ublox_msgs::msg::AidALM>("aidalm", 1);
     }
-    if (getRosBoolean(this, "publish.aid.eph")) {
+    if (getRosBoolean(this, "publish.aid.eph"))
+    {
         aid_eph_pub_ = this->create_publisher<ublox_msgs::msg::AidEPH>("aideph", 1);
     }
-    if (getRosBoolean(this, "publish.aid.hui")) {
+    if (getRosBoolean(this, "publish.aid.hui"))
+    {
         aid_hui_pub_ = this->create_publisher<ublox_msgs::msg::AidHUI>("aidhui", 1);
     }
 
-    rtcm_sub_ = this->create_subscription<ublox_msgs::msg::Rtcm>("/rtcm", 1, std::bind(&UbloxNode::rtcmCb, this, std::placeholders::_1));
+    rtcm_sub_ = this->create_subscription<ublox_msgs::msg::Rtcm>(
+        "/rtcm", 1, std::bind(&UbloxNode::rtcmCb, this, std::placeholders::_1));
 }
 
-void UbloxNode::keepAlive() {
+void UbloxNode::keepAlive()
+{
     // Poll version message to keep UDP socket active
     gps_->poll(ublox_msgs::Class::MON, ublox_msgs::Message::MON::VER);
 }
 
-void UbloxNode::pollMessages() {
+void UbloxNode::pollMessages()
+{
     static std::vector<uint8_t> payload(1, 1);
-    if (getRosBoolean(this, "publish.aid.alm")) {
+    if (getRosBoolean(this, "publish.aid.alm"))
+    {
         gps_->poll(ublox_msgs::Class::AID, ublox_msgs::Message::AID::ALM, payload);
     }
-    if (getRosBoolean(this, "publish.aid.eph")) {
+    if (getRosBoolean(this, "publish.aid.eph"))
+    {
         gps_->poll(ublox_msgs::Class::AID, ublox_msgs::Message::AID::EPH, payload);
     }
-    if (getRosBoolean(this, "publish.aid.hui")) {
+    if (getRosBoolean(this, "publish.aid.hui"))
+    {
         gps_->poll(ublox_msgs::Class::AID, ublox_msgs::Message::AID::HUI);
     }
 
     payload[0]++;
-    if (payload[0] > 32) {
+    if (payload[0] > 32)
+    {
         payload[0] = 1;
     }
 }
@@ -897,91 +917,107 @@ void UbloxNode::configureInf()
     }
 }
 
-void UbloxNode::initializeIo() {
+void UbloxNode::initializeIo()
+{
     gps_->setConfigOnStartup(getRosBoolean(this, "config_on_startup"));
 
     std::smatch match;
-    if (std::regex_match(device_, match,
-                       std::regex("(tcp|udp)://(.+):(\\d+)"))) {
+    if (std::regex_match(device_, match, std::regex("(tcp|udp)://(.+):(\\d+)")))
+    {
         std::string proto(match[1]);
-        if (proto == "tcp") {
+        if (proto == "tcp")
+        {
             std::string host(match[2]);
             std::string port(match[3]);
-            RCLCPP_INFO(this->get_logger(), "Connecting to %s://%s:%s ...", proto.c_str(), host.c_str(),
-               port.c_str());
+            RCLCPP_INFO(this->get_logger(), "Connecting to %s://%s:%s ...", proto.c_str(), host.c_str(), port.c_str());
             gps_->initializeTcp(host, port);
-        } else if (proto == "udp") {
+        }
+        else if (proto == "udp")
+        {
             std::string host(match[2]);
             std::string port(match[3]);
-            RCLCPP_INFO(this->get_logger(), "Connecting to %s://%s:%s ...", proto.c_str(), host.c_str(),
-               port.c_str());
+            RCLCPP_INFO(this->get_logger(), "Connecting to %s://%s:%s ...", proto.c_str(), host.c_str(), port.c_str());
             gps_->initializeUdp(host, port);
-        } else {
+        }
+        else
+        {
             throw std::runtime_error("Protocol '" + proto + "' is unsupported");
         }
-    } else {
+    }
+    else
+    {
         gps_->initializeSerial(device_, baudrate_, uart_in_, uart_out_);
     }
 
     // raw data stream logging
-    if (getRosBoolean(this, "raw_data_stream.enable")) {
-        if (raw_data_stream_pa_->isEnabled()) {
-            gps_->setRawDataCallback(
-        std::bind(&RawDataStreamPa::ubloxCallback, raw_data_stream_pa_.get(),
+    if (getRosBoolean(this, "raw_data_stream.enable"))
+    {
+        if (raw_data_stream_pa_->isEnabled())
+        {
+            gps_->setRawDataCallback(std::bind(&RawDataStreamPa::ubloxCallback, raw_data_stream_pa_.get(),
                                                std::placeholders::_1, std::placeholders::_2));
             raw_data_stream_pa_->initialize();
         }
     }
 }
 
-void UbloxNode::initialize() {
+void UbloxNode::initialize()
+{
     // Params must be set before initializing IO
     getRosParams();
 
     // configure diagnostic updater for frequency
-    freq_diag_ = std::make_shared<FixDiagnostic>(std::string("fix"), kFixFreqTol,
-                                               kFixFreqWindow, kTimeStampStatusMin, nav_rate_, meas_rate_, updater_);
-
+    freq_diag_ = std::make_shared<FixDiagnostic>(std::string("fix"), kFixFreqTol, kFixFreqWindow, kTimeStampStatusMin,
+                                                 nav_rate_, meas_rate_, updater_);
 
     initializeIo();
     // Must process Mon VER before setting firmware/hardware params
     processMonVer();
-    if (protocol_version_ <= 14.0) {
-        if (getRosBoolean(this, "raw_data")) {
+    if (protocol_version_ <= 14.0)
+    {
+        if (getRosBoolean(this, "raw_data"))
+        {
             components_.push_back(std::make_shared<RawDataProduct>(nav_rate_, meas_rate_, updater_, this));
         }
     }
     // Must set firmware & hardware params before initializing diagnostics
-    for (const std::shared_ptr<ComponentInterface> & component : components_) {
+    for (const std::shared_ptr<ComponentInterface>& component : components_)
+    {
         component->getRosParams();
     }
     // Do this last
     initializeRosDiagnostics();
 
-    if (configureUblox()) {
+    if (configureUblox())
+    {
         RCLCPP_INFO(this->get_logger(), "U-Blox configured successfully.");
         // Subscribe to all U-Blox messages
         subscribe();
         // Configure INF messages (needs INF params, call after subscribing)
         configureInf();
 
-        if (device_.substr(0, 6) == "udp://") {
+        if (device_.substr(0, 6) == "udp://")
+        {
             // Setup timer to poll version message to keep UDP socket active
-            keep_alive_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kKeepAlivePeriod * 1000.0)),
+            keep_alive_ =
+                this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kKeepAlivePeriod * 1000.0)),
                                         std::bind(&UbloxNode::keepAlive, this));
         }
 
         poller_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kPollDuration * 1000.0)),
                                           std::bind(&UbloxNode::pollMessages, this));
     }
-    else {
+    else
+    {
         shutdown();
     }
 }
 
-void UbloxNode::rtcmCb(const ublox_msgs::msg::Rtcm::SharedPtr msg){
-    rtcm_bytes_+= msg->message.size();
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 60000, "Sent %f Kb of rtcm data to the receiver so far", (float)rtcm_bytes_/1024.0f);
+void UbloxNode::rtcmCb(const ublox_msgs::msg::Rtcm::SharedPtr msg)
+{
+    rtcm_bytes_ += msg->message.size();
+    RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 60000,
+                         "Sent %f Kb of rtcm data to the receiver so far", (float)rtcm_bytes_ / 1024.0f);
     gps_->sendRtcm(msg->message);
 }
 
@@ -992,7 +1028,11 @@ void UbloxNode::pauseCb(std_srvs::srv::SetBool::Request::SharedPtr request,
     {
         response->success = gps_->isInitialized();
         if (response->success)
+        {
             gps_->close();
+            keep_alive_->cancel();
+            poller_->cancel();
+        }
         else
             response->message = "GPS already paused";
     }
@@ -1000,7 +1040,11 @@ void UbloxNode::pauseCb(std_srvs::srv::SetBool::Request::SharedPtr request,
     {
         response->success = !gps_->isInitialized();
         if (response->success)
+        {
             initializeIo();
+            if (device_.substr(0, 6) == "udp://") keep_alive_->reset();
+            poller_->reset();
+        }
         else
             response->message = "GPS already initialized";
     }
