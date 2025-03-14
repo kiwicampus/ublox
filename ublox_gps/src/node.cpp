@@ -956,21 +956,31 @@ void UbloxNode::initialize() {
   freq_diag_ = std::make_shared<FixDiagnostic>(std::string("fix"), kFixFreqTol,
                                                kFixFreqWindow, kTimeStampStatusMin, nav_rate_, meas_rate_, updater_);
 
-
-  initializeIo();
-  // Must process Mon VER before setting firmware/hardware params
-  processMonVer();
-  if (protocol_version_ <= 14.0) {
-    if (getRosBoolean(this, "raw_data")) {
-      components_.push_back(std::make_shared<RawDataProduct>(nav_rate_, meas_rate_, updater_, this));
+  while (true) {
+    try
+    {
+      initializeIo();
+        // Must process Mon VER before setting firmware/hardware params
+      processMonVer();
+      if (protocol_version_ <= 14.0) {
+        if (getRosBoolean(this, "raw_data")) {
+          components_.push_back(std::make_shared<RawDataProduct>(nav_rate_, meas_rate_, updater_, this));
+        }
+      }
+      // Must set firmware & hardware params before initializing diagnostics
+      for (const std::shared_ptr<ComponentInterface> & component : components_) {
+        component->getRosParams();
+      }
+      // Do this last
+      initializeRosDiagnostics();
+      break;
+    } 
+    catch (const std::exception& e)
+    {
+      RCLCPP_ERROR(this->get_logger(), "Failed to initialize U-Blox: %s", e.what());
     }
+    std::this_thread::sleep_for(std::chrono::seconds(10));
   }
-  // Must set firmware & hardware params before initializing diagnostics
-  for (const std::shared_ptr<ComponentInterface> & component : components_) {
-    component->getRosParams();
-  }
-  // Do this last
-  initializeRosDiagnostics();
 
   while (!configureUblox()) {
     RCLCPP_WARN(this->get_logger(), "U-Blox not configured successfully. Retrying...");
