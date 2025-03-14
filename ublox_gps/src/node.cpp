@@ -972,25 +972,26 @@ void UbloxNode::initialize() {
   // Do this last
   initializeRosDiagnostics();
 
-  if (configureUblox()) {
-    RCLCPP_INFO(this->get_logger(), "U-Blox configured successfully.");
-    // Subscribe to all U-Blox messages
-    subscribe();
-    // Configure INF messages (needs INF params, call after subscribing)
-    configureInf();
-
-    if (device_.substr(0, 6) == "udp://") {
-      // Setup timer to poll version message to keep UDP socket active
-      keep_alive_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kKeepAlivePeriod * 1000.0)),
-                                            std::bind(&UbloxNode::keepAlive, this));
-    }
-
-    poller_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kPollDuration * 1000.0)),
-                                      std::bind(&UbloxNode::pollMessages, this));
+  while (!configureUblox()) {
+    RCLCPP_WARN(this->get_logger(), "U-Blox not configured successfully. Retrying...");
+    std::this_thread::sleep_for(std::chrono::seconds(10));
   }
-  else {
-        shutdown();
+
+  RCLCPP_INFO(this->get_logger(), "U-Blox configured successfully.");
+  // Subscribe to all U-Blox messages
+  subscribe();
+  // Configure INF messages (needs INF params, call after subscribing)
+  configureInf();
+
+  if (device_.substr(0, 6) == "udp://") {
+    // Setup timer to poll version message to keep UDP socket active
+    keep_alive_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kKeepAlivePeriod * 1000.0)),
+                                          std::bind(&UbloxNode::keepAlive, this));
   }
+
+  poller_ = this->create_wall_timer(std::chrono::milliseconds(static_cast<int64_t>(kPollDuration * 1000.0)),
+                                    std::bind(&UbloxNode::pollMessages, this));
+
 }
 
 void UbloxNode::shutdown()
