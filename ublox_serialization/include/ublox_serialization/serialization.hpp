@@ -36,6 +36,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <system_error>
 
 #include "checksum.hpp"
 
