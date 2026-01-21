@@ -508,9 +508,13 @@ class Reader {
       // do any additional work.
       return false;
     }
-
-    UbloxSerializer<T>::read(data_ + options_.header_length, length(), message);
-    return true;
+    try {
+      UbloxSerializer<T>::read(data_ + options_.header_length, length(), message);
+      return true;
+    }
+    catch(std::system_error& e) {
+      return false;
+    }
   }
 
   /**
@@ -589,9 +593,14 @@ class Writer {
       return false;
     }
     // Encode the message and add it to the buffer
-    UbloxSerializer<T>::write(data_ + options_.header_length,
-                         size_ - options_.header_length, message);
-    return write(nullptr, length, class_id, message_id);
+    try {
+      UbloxSerializer<T>::write(data_ + options_.header_length,
+                          size_ - options_.header_length, message);
+      return write(nullptr, length, class_id, message_id);
+    }
+    catch(std::system_error& e) {
+      return false;
+    }
   }
 
   /**
