@@ -30,6 +30,7 @@
 #ifndef UBLOX_MSGS_SERIALIZATION_HPP
 #define UBLOX_MSGS_SERIALIZATION_HPP
 
+#include <algorithm>
 #include <cstdint>
 
 #include <ublox_serialization/serialization.hpp>
@@ -157,6 +158,29 @@ struct UbloxSerializer<ublox_msgs::msg::AidEPH_<ContainerAllocator> >
     for (std::size_t i = 0; i < m.sf3d.size(); ++i) {
       serialize(stream, m.sf3d[i]);
     }
+  }
+};
+
+///
+/// @brief Serializes the MgaDBD message, an opaque navigation database blob.
+///
+template <typename ContainerAllocator>
+struct UbloxSerializer<ublox_msgs::msg::MgaDBD_<ContainerAllocator> >
+{
+  inline static void read(const uint8_t *data, uint32_t count,
+                          ublox_msgs::msg::MgaDBD_<ContainerAllocator> &m) {
+    m.data.resize(count);
+    std::copy(data, data + count, m.data.begin());
+  }
+
+  inline static uint32_t serializedLength(const ublox_msgs::msg::MgaDBD_<ContainerAllocator> &m) {
+    return m.data.size();
+  }
+
+  inline static void write(uint8_t *data, uint32_t size,
+                           const ublox_msgs::msg::MgaDBD_<ContainerAllocator> &m) {
+    (void)size;
+    std::copy(m.data.begin(), m.data.end(), data);
   }
 };
 

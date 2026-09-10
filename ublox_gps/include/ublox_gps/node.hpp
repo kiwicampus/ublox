@@ -149,6 +149,17 @@ class UbloxNode final : public rclcpp::Node {
   rclcpp::Subscription<rtcm_msgs::msg::Message>::SharedPtr subscription_;
 
   /**
+   * @brief Callback for '/mga' subscription to inject raw MGA-DBD / MGA-INI
+   * frames into the receiver.
+   */
+  void mgaCallback(const rtcm_msgs::msg::Message::SharedPtr msg);
+
+  /**
+   * @brief Subscription handler for MGA aiding data injection
+   */
+  rclcpp::Subscription<rtcm_msgs::msg::Message>::SharedPtr mga_subscription_;
+
+  /**
    * @brief Initialize the I/O handling.
    */
   void initializeIo();
@@ -272,6 +283,7 @@ class UbloxNode final : public rclcpp::Node {
   rclcpp::Publisher<ublox_msgs::msg::AidALM>::SharedPtr aid_alm_pub_;
   rclcpp::Publisher<ublox_msgs::msg::AidEPH>::SharedPtr aid_eph_pub_;
   rclcpp::Publisher<ublox_msgs::msg::AidHUI>::SharedPtr aid_hui_pub_;
+  rclcpp::Publisher<ublox_msgs::msg::MgaDBD>::SharedPtr mga_dbd_pub_;
   rclcpp::Publisher<nmea_msgs::msg::Sentence>::SharedPtr nmea_pub_;
 
   void publish_nmea(const std::string & sentence, const std::string & topic);

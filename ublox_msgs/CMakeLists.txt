@@ -50,6 +50,7 @@ set(msg_files
   "msg/EsfSTATUSSens.msg"
   "msg/HnrPVT.msg"
   "msg/Inf.msg"
+  "msg/MgaDBD.msg"
   "msg/MgaGAL.msg"
   "msg/MonGNSS.msg"
   "msg/MonHW6.msg"

@@ -195,6 +195,8 @@ DECLARE_UBLOX_MESSAGE(ublox_msgs::Class::ESF, ublox_msgs::Message::ESF::STATUS,
 
 DECLARE_UBLOX_MESSAGE(ublox_msgs::Class::MGA, ublox_msgs::Message::MGA::GAL,
                       ublox_msgs, MgaGAL)
+DECLARE_UBLOX_MESSAGE(ublox_msgs::Class::MGA, ublox_msgs::Message::MGA::DBD,
+                      ublox_msgs, MgaDBD)
 
 DECLARE_UBLOX_MESSAGE(ublox_msgs::Class::HNR, ublox_msgs::Message::HNR::PVT,
                       ublox_msgs, HnrPVT)

@@ -104,6 +104,7 @@
 #include <ublox_msgs/msg/esf_status.hpp>
 #include <ublox_msgs/msg/esf_status_sens.hpp>
 
+#include <ublox_msgs/msg/mga_dbd.hpp>
 #include <ublox_msgs/msg/mga_gal.hpp>
 
 #include <ublox_msgs/msg/hnr_pvt.hpp>
@@ -245,6 +246,7 @@ namespace Message {
 
   namespace MGA {
     static const uint8_t GAL = ublox_msgs::msg::MgaGAL::MESSAGE_ID;
+    static const uint8_t DBD = ublox_msgs::msg::MgaDBD::MESSAGE_ID;
   }  // namespace MGA
 
   namespace HNR {

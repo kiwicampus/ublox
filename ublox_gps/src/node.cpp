@@ -216,6 +216,11 @@ void UbloxNode::rtcmCallback(const rtcm_msgs::msg::Message::SharedPtr msg) {
   gps_->sendRtcm(msg->message);
 }
 
+void UbloxNode::mgaCallback(const rtcm_msgs::msg::Message::SharedPtr msg) {
+  RCLCPP_INFO(this->get_logger(), "Injecting %zu bytes of MGA aiding data into the receiver", msg->message.size());
+  gps_->sendRtcm(msg->message);
+}
+
 void UbloxNode::addFirmwareInterface() {
   int ublox_version;
   if (protocol_version_ < 14.0) {
@@ -460,6 +465,8 @@ void UbloxNode::getRosParams() {
   this->declare_parameter("publish.aid.eph", getRosBoolean(this, "publish.aid.all"));
   this->declare_parameter("publish.aid.hui", getRosBoolean(this, "publish.aid.all"));
 
+  this->declare_parameter("publish.mga.dbd", getRosBoolean(this, "publish.all"));
+
   this->declare_parameter("publish.mon.all", getRosBoolean(this, "publish.all"));
   this->declare_parameter("publish.mon.hw", getRosBoolean(this, "publish.mon.all"));
 
@@ -515,6 +522,9 @@ void UbloxNode::getRosParams() {
   if (getRosBoolean(this, "publish.aid.hui")) {
     aid_hui_pub_ = this->create_publisher<ublox_msgs::msg::AidHUI>("aidhui", 1);
   }
+  if (getRosBoolean(this, "publish.mga.dbd")) {
+    mga_dbd_pub_ = this->create_publisher<ublox_msgs::msg::MgaDBD>("mgadbd", 1);
+  }
   if (getRosBoolean(this, "publish.nmea")) {
     // Larger queue depth to handle all NMEA strings being published consecutively
     nmea_pub_ = this->create_publisher<nmea_msgs::msg::Sentence>("nmea", 20);
@@ -522,6 +532,9 @@ void UbloxNode::getRosParams() {
 
   // Create subscriber for RTCM correction data to enable RTK
   this->subscription_ = this->create_subscription<rtcm_msgs::msg::Message>("/rtcm", 10, std::bind(&UbloxNode::rtcmCallback, this, std::placeholders::_1));
+
+  // Create subscriber for raw MGA aiding data (MGA-DBD / MGA-INI) injection
+  this->mga_subscription_ = this->create_subscription<rtcm_msgs::msg::Message>("/mga", 10, std::bind(&UbloxNode::mgaCallback, this, std::placeholders::_1));
 }
 
 void UbloxNode::keepAlive() {
@@ -539,6 +552,9 @@ void UbloxNode::pollMessages() {
   }
   if (getRosBoolean(this, "publish.aid.hui")) {
     gps_->poll(ublox_msgs::Class::AID, ublox_msgs::Message::AID::HUI);
+  }
+  if (getRosBoolean(this, "publish.mga.dbd")) {
+    gps_->poll(ublox_msgs::Class::MGA, ublox_msgs::Message::MGA::DBD);
   }
 
   payload[0]++;
@@ -648,6 +664,13 @@ void UbloxNode::subscribe()
     if (getRosBoolean(this, "publish.aid.hui"))
     {
         gps_->subscribe<ublox_msgs::msg::AidHUI>([this](const ublox_msgs::msg::AidHUI& m) { aid_hui_pub_->publish(m); },
+                                                 1);
+    }
+
+    // MGA messages
+    if (getRosBoolean(this, "publish.mga.dbd"))
+    {
+        gps_->subscribe<ublox_msgs::msg::MgaDBD>([this](const ublox_msgs::msg::MgaDBD& m) { mga_dbd_pub_->publish(m); },
                                                  1);
     }
 
