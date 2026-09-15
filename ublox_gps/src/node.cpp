@@ -338,6 +338,11 @@ void UbloxNode::getRosParams() {
     RCLCPP_WARN(this->get_logger(), "Warning: PPP is enabled - this is an expert setting.");
   }
 
+  // AssistNow Autonomous: required for the receiver to maintain the navigation
+  // database polled via UBX-MGA-DBD (issue #6214) - off by default on the receiver
+  // itself, so a MGA-DBD poll silently gets no response at all until this is set.
+  this->declare_parameter("enable_aop", false);
+
   // SBAS params, only for some devices
   this->declare_parameter("gnss.sbas", false);
   this->declare_parameter("gnss.gps", true);
@@ -850,6 +855,12 @@ bool UbloxNode::configureUblox()
             {
                 throw std::runtime_error(std::string("Failed to ") +
                                          (getRosBoolean(this, "enable_ppp") ? "enable" : "disable") + " PPP.");
+            }
+            if (!gps_->setUseAop(getRosBoolean(this, "enable_aop")))
+            {
+                throw std::runtime_error(std::string("Failed to ") +
+                                         (getRosBoolean(this, "enable_aop") ? "enable" : "disable") +
+                                         " AssistNow Autonomous.");
             }
             if (!gps_->setDynamicModel(dmodel_))
             {

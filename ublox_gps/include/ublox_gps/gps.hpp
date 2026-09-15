@@ -303,6 +303,17 @@ class Gps final {
   bool setPpp(bool enable);
 
   /**
+   * @brief Enable or disable AssistNow Autonomous.
+   * @param enable If true, enable AssistNow Autonomous.
+   * @return true on ACK, false on other conditions.
+   *
+   * @note Required for the receiver to build/maintain the navigation database
+   * polled via UBX-MGA-DBD - with this disabled (the factory default) the
+   * receiver has nothing to hand back and a MGA-DBD poll gets no response.
+   */
+  bool setUseAop(bool enable);
+
+  /**
    * @brief Set the DGNSS mode (see CfgDGNSS message for details).
    * @param mode the DGNSS mode (see CfgDGNSS message for options)
    * @return true on ACK, false on other conditions
