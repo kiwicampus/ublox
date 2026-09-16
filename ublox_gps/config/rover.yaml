@@ -20,10 +20,7 @@ ublox_gps_node:
                                 # Max Horizontal Velocity: 250 m/s,
                                 # Max Vertical Velocity: 100 m/s
     fix_mode: auto
-    enable_ppp: false
-    enable_aop: true          # AssistNow Autonomous - required for the receiver to
-                              # maintain the nav database polled via UBX-MGA-DBD
-                              # (GPS aiding relay, issue #6214)
+    enable_ppp: false  
 
     # We want to increase the GPS covariance with the following rules
     # 1. No covariance can be less than 1m**2. This is because though the GPS can produce

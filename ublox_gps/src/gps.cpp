@@ -564,15 +564,6 @@ bool Gps::setPpp(bool enable) {
   return configure(msg);
 }
 
-bool Gps::setUseAop(bool enable) {
-  RCLCPP_DEBUG(logger_, "%s AssistNow Autonomous", (enable ? "Enabling" : "Disabling"));
-
-  ublox_msgs::msg::CfgNAVX5 msg;
-  msg.aop_cfg = enable;
-  msg.mask1 = ublox_msgs::msg::CfgNAVX5::MASK1_AOP;
-  return configure(msg);
-}
-
 bool Gps::setDgnss(uint8_t mode) {
   ublox_msgs::msg::CfgDGNSS cfg;
   RCLCPP_DEBUG(logger_, "Setting DGNSS mode to %u", mode);
