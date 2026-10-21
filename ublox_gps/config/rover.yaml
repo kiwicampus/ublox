@@ -21,6 +21,7 @@ ublox_gps_node:
                                 # Max Vertical Velocity: 100 m/s
     fix_mode: auto
     enable_ppp: false  
+    ack_aiding: true            # Answer injected MGA assistance with MGA-ACK (mgaack)
 
     # We want to increase the GPS covariance with the following rules
     # 1. No covariance can be less than 1m**2. This is because though the GPS can produce
@@ -90,6 +91,13 @@ ublox_gps_node:
       all: true
       aid:
         hui: false
+
+      # gnss_assist decodes ephemerides from the raw subframes and reads the
+      # receiver model and firmware from MON-VER
+      rxm:
+        sfrb: true
+      mon:
+        ver: true
 
       nav:
         posecef: false

@@ -13,7 +13,8 @@ uint8 MESSAGE_ID = 19
 uint8 gnss_id            # GNSS identifier (see Cfg GNSS for constants)
 
 uint8 sv_id              # Satellite identifier within corresponding GNSS system
-uint8 reserved0         # Reserved
+uint8 sig_id            # Signal identifier (see Signal Identifiers), e.g. 0 for
+                        # GPS L1C/A and 1 for Galileo E1-B
 uint8 freq_id            # Only used for GLONASS: This is the frequency
                         # slot + 7 (range from 0 to 13)
 uint8 num_words          # The number of data words contained in this message (up

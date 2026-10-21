@@ -8,7 +8,6 @@
 #include <sensor_msgs/msg/time_reference.hpp>
 
 #include <ublox_msgs/msg/rxm_rawx.hpp>
-#include <ublox_msgs/msg/rxm_sfrbx.hpp>
 #include <ublox_msgs/msg/tim_tm2.hpp>
 
 #include <ublox_gps/gps.hpp>
@@ -27,9 +26,6 @@ TimProduct::TimProduct(const std::string & frame_id, std::shared_ptr<diagnostic_
   interrupt_time_pub_ =
     node_->create_publisher<sensor_msgs::msg::TimeReference>("interrupt_time", 1);
 
-  if (getRosBoolean(node_, "publish.rxm.sfrb")) {
-    rxm_sfrb_pub_ = node_->create_publisher<ublox_msgs::msg::RxmSFRBX>("rxmsfrb", 1);
-  }
   if (getRosBoolean(node_, "publish.rxm.raw")) {
     rxm_raw_pub_ = node_->create_publisher<ublox_msgs::msg::RxmRAWX>("rxmraw", 1);
   }
@@ -57,12 +53,6 @@ void TimProduct::subscribe(std::shared_ptr<ublox_gps::Gps> gps) {
     &TimProduct::callbackTimTM2, this, std::placeholders::_1), 1);
 
   // RCLCPP_INFO("Subscribed to TIM-TM2 messages on topic tim/tm2");
-
-  // Subscribe to SFRBX messages
-  if (getRosBoolean(node_, "publish.rxm.sfrb")) {
-    gps->subscribe<ublox_msgs::msg::RxmSFRBX>([this](const ublox_msgs::msg::RxmSFRBX &m) { rxm_sfrb_pub_->publish(m); },
-                                         1);
-  }
 
   // Subscribe to RawX messages
   if (getRosBoolean(node_, "publish.rxm.raw")) {

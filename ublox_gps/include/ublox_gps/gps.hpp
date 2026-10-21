@@ -132,6 +132,7 @@ class Gps final {
   /**
    * @brief Send rtcm correction messages to the connected device.
    * @param message the RTCM correction data as a vector
+   * @return false if the output buffer had no room for the whole message
    */
   bool sendRtcm(const std::vector<uint8_t> &message);
 
@@ -301,6 +302,13 @@ class Gps final {
    * the ublox manual first.
    */
   bool setPpp(bool enable);
+
+  /**
+   * @brief Enable or disable MGA-ACK acknowledgments for assistance messages.
+   * @param enable If true, the receiver answers each MGA message with MGA-ACK.
+   * @return true on ACK, false on other conditions.
+   */
+  bool setAckAiding(bool enable);
 
   /**
    * @brief Set the DGNSS mode (see CfgDGNSS message for details).

@@ -149,6 +149,24 @@ class UbloxNode final : public rclcpp::Node {
   rclcpp::Subscription<rtcm_msgs::msg::Message>::SharedPtr subscription_;
 
   /**
+   * @brief Callback for the '/mga' subscription. Writes framed UBX-MGA
+   * assistance messages (MGA-INI, MGA-GPS-EPH, ...) to the receiver.
+   */
+  void mgaCallback(const rtcm_msgs::msg::Message::SharedPtr msg);
+
+  /**
+   * @brief Writes raw bytes to the receiver, warning when they don't fit in
+   * the output buffer and are dropped.
+   * @param what the kind of data, for the warning
+   */
+  void writeToReceiver(const std::vector<uint8_t> &data, const char *what);
+
+  /**
+   * @brief Subscription handler for MGA assistance data injection
+   */
+  rclcpp::Subscription<rtcm_msgs::msg::Message>::SharedPtr mga_subscription_;
+
+  /**
    * @brief Initialize the I/O handling.
    */
   void initializeIo();
@@ -273,6 +291,9 @@ class UbloxNode final : public rclcpp::Node {
   rclcpp::Publisher<ublox_msgs::msg::AidEPH>::SharedPtr aid_eph_pub_;
   rclcpp::Publisher<ublox_msgs::msg::AidHUI>::SharedPtr aid_hui_pub_;
   rclcpp::Publisher<nmea_msgs::msg::Sentence>::SharedPtr nmea_pub_;
+  rclcpp::Publisher<ublox_msgs::msg::RxmSFRBX>::SharedPtr rxm_sfrbx_pub_;
+  rclcpp::Publisher<ublox_msgs::msg::MgaACK>::SharedPtr mga_ack_pub_;
+  rclcpp::Publisher<ublox_msgs::msg::MonVER>::SharedPtr mon_ver_pub_;
 
   void publish_nmea(const std::string & sentence, const std::string & topic);
 

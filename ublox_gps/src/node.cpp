@@ -213,7 +213,18 @@ UbloxNode::UbloxNode(const rclcpp::NodeOptions& options) : rclcpp::Node("ublox_g
 void UbloxNode::rtcmCallback(const rtcm_msgs::msg::Message::SharedPtr msg) {
   rtcm_bytes_+= msg->message.size();
   RCLCPP_INFO_THROTTLE(this->get_logger(), *this->get_clock(), 60000, "Sent %f Kb of rtcm data to the receiver so far", (float)rtcm_bytes_/1024.0f);
-  gps_->sendRtcm(msg->message);
+  writeToReceiver(msg->message, "RTCM");
+}
+
+void UbloxNode::mgaCallback(const rtcm_msgs::msg::Message::SharedPtr msg) {
+  RCLCPP_DEBUG(this->get_logger(), "Injecting %zu bytes of MGA assistance data into the receiver", msg->message.size());
+  writeToReceiver(msg->message, "MGA assistance");
+}
+
+void UbloxNode::writeToReceiver(const std::vector<uint8_t> &data, const char *what) {
+  if (!gps_->sendRtcm(data)) {
+    RCLCPP_WARN(this->get_logger(), "Dropped %zu bytes of %s data, the receiver's output buffer is full", data.size(), what);
+  }
 }
 
 void UbloxNode::addFirmwareInterface() {
@@ -329,6 +340,8 @@ void UbloxNode::getRosParams() {
 
   // PPP: Advanced Setting
   this->declare_parameter("enable_ppp", false);
+  // Answer each MGA assistance message with MGA-ACK, published on 'mgaack'
+  this->declare_parameter("ack_aiding", false);
   if (getRosBoolean(this, "enable_ppp")) {
     RCLCPP_WARN(this->get_logger(), "Warning: PPP is enabled - this is an expert setting.");
   }
@@ -462,6 +475,7 @@ void UbloxNode::getRosParams() {
 
   this->declare_parameter("publish.mon.all", getRosBoolean(this, "publish.all"));
   this->declare_parameter("publish.mon.hw", getRosBoolean(this, "publish.mon.all"));
+  this->declare_parameter("publish.mon.ver", getRosBoolean(this, "publish.mon.all"));
 
   this->declare_parameter("publish.tim.tm2", false);
 
@@ -519,9 +533,21 @@ void UbloxNode::getRosParams() {
     // Larger queue depth to handle all NMEA strings being published consecutively
     nmea_pub_ = this->create_publisher<nmea_msgs::msg::Sentence>("nmea", 20);
   }
+  if (getRosBoolean(this, "ack_aiding")) {
+    // One acknowledgment per injected MGA message, also in bursts
+    mga_ack_pub_ = this->create_publisher<ublox_msgs::msg::MgaACK>("mgaack", 100);
+  }
+  if (getRosBoolean(this, "publish.mon.ver")) {
+    // Latched, MON-VER is only read once at startup
+    mon_ver_pub_ = this->create_publisher<ublox_msgs::msg::MonVER>("monver", rclcpp::QoS(1).transient_local());
+  }
 
   // Create subscriber for RTCM correction data to enable RTK
   this->subscription_ = this->create_subscription<rtcm_msgs::msg::Message>("/rtcm", 10, std::bind(&UbloxNode::rtcmCallback, this, std::placeholders::_1));
+
+  // Create subscriber for MGA assistance data. A full injection is sent as one
+  // message, so a short queue is enough
+  this->mga_subscription_ = this->create_subscription<rtcm_msgs::msg::Message>("/mga", 10, std::bind(&UbloxNode::mgaCallback, this, std::placeholders::_1));
 }
 
 void UbloxNode::keepAlive() {
@@ -651,6 +677,26 @@ void UbloxNode::subscribe()
                                                  1);
     }
 
+  // RXM messages. Receivers up to protocol 14 report subframes as RXM-SFRB,
+  // which RawDataProduct publishes on the same topic
+  if (protocol_version_ > 14.0) {
+    if (getRosBoolean(this, "publish.rxm.sfrb")) {
+      // A subframe arrives per tracked signal every few seconds, in bursts
+      rxm_sfrbx_pub_ = this->create_publisher<ublox_msgs::msg::RxmSFRBX>("rxmsfrb", 100);
+      gps_->subscribe<ublox_msgs::msg::RxmSFRBX>([this](const ublox_msgs::msg::RxmSFRBX &m) { rxm_sfrbx_pub_->publish(m); },
+                                               1);
+    } else {
+      // The message configuration may be saved to flash, so switch the output off explicitly
+      gps_->setRate(ublox_msgs::Class::RXM, ublox_msgs::Message::RXM::SFRBX, 0);
+    }
+  }
+
+  // MGA messages
+  if (getRosBoolean(this, "ack_aiding")) {
+    // MGA-ACK is an event output, it has no rate to configure
+    gps_->subscribe<ublox_msgs::msg::MgaACK>([this](const ublox_msgs::msg::MgaACK &m) { mga_ack_pub_->publish(m); });
+  }
+
   if (getRosBoolean(this, "publish.nmea")) {
     gps_->subscribe_nmea([this](const std::string &sentence) {
       nmea_msgs::msg::Sentence m;
@@ -680,6 +726,10 @@ void UbloxNode::processMonVer()
     if (!gps_->poll(monVer))
     {
         throw std::runtime_error("Failed to poll MonVER & set relevant settings");
+    }
+    if (mon_ver_pub_)
+    {
+        mon_ver_pub_->publish(monVer);
     }
 
     RCLCPP_INFO(this->get_logger(), "%s, HW VER: %s",
@@ -827,6 +877,12 @@ bool UbloxNode::configureUblox()
             {
                 throw std::runtime_error(std::string("Failed to ") +
                                          (getRosBoolean(this, "enable_ppp") ? "enable" : "disable") + " PPP.");
+            }
+            // Not fatal: without acknowledgments, assistance still works, it just can't be verified
+            if (!gps_->setAckAiding(getRosBoolean(this, "ack_aiding")))
+            {
+                RCLCPP_WARN(this->get_logger(), "Failed to %s MGA acknowledgments",
+                            getRosBoolean(this, "ack_aiding") ? "enable" : "disable");
             }
             if (!gps_->setDynamicModel(dmodel_))
             {

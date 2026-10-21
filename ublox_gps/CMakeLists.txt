@@ -105,6 +105,13 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+if(BUILD_TESTING)
+  find_package(ament_cmake_gtest REQUIRED)
+  # Starts the driver against a fake receiver on a local TCP socket
+  ament_add_gtest(${PROJECT_NAME}_test test/test_gnss_assist.cpp TIMEOUT 180)
+  target_link_libraries(${PROJECT_NAME}_test ublox_gps ${rtcm_msgs_TARGETS})
+endif()
+
 ament_export_include_directories("include/${PROJECT_NAME}")
 ament_export_targets(export_${PROJECT_NAME})
 

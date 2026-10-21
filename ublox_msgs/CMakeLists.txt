@@ -50,6 +50,7 @@ set(msg_files
   "msg/EsfSTATUSSens.msg"
   "msg/HnrPVT.msg"
   "msg/Inf.msg"
+  "msg/MgaACK.msg"
   "msg/MgaGAL.msg"
   "msg/MonGNSS.msg"
   "msg/MonHW6.msg"
@@ -131,5 +132,13 @@ if(cpp_typesupport_target)
 endif()
 
 ament_export_dependencies(rosidl_default_runtime sensor_msgs std_msgs ublox_serialization)
+
+if(BUILD_TESTING AND cpp_typesupport_target)
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(${PROJECT_NAME}_test test/test_serialization.cpp)
+  target_include_directories(${PROJECT_NAME}_test PRIVATE
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
+  target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME}_lib)
+endif()
 
 ament_package()

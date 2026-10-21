@@ -564,6 +564,16 @@ bool Gps::setPpp(bool enable) {
   return configure(msg);
 }
 
+bool Gps::setAckAiding(bool enable) {
+  RCLCPP_DEBUG(logger_, "%s assistance acknowledgments", (enable ? "Enabling" : "Disabling"));
+
+  ublox_msgs::msg::CfgNAVX5 msg;
+  msg.version = 2;  // the version F9 firmware documents for this message
+  msg.ack_aiding = enable;
+  msg.mask1 = ublox_msgs::msg::CfgNAVX5::MASK1_ACK_AID;
+  return configure(msg);
+}
+
 bool Gps::setDgnss(uint8_t mode) {
   ublox_msgs::msg::CfgDGNSS cfg;
   RCLCPP_DEBUG(logger_, "Setting DGNSS mode to %u", mode);
@@ -581,8 +591,7 @@ bool Gps::setUseAdr(bool enable) {
 }
 
 bool Gps::sendRtcm(const std::vector<uint8_t>& rtcm) {
-  worker_->send(rtcm.data(), rtcm.size());
-  return true;
+  return worker_->send(rtcm.data(), rtcm.size());
 }
 
 bool Gps::poll(uint8_t class_id, uint8_t message_id,

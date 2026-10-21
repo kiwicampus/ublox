@@ -66,6 +66,43 @@ struct UbloxSerializer<ublox_msgs::msg::Ack_<ContainerAllocator> > {
 };
 
 ///
+/// @brief Serializes the MgaACK message which has a fixed length array.
+///
+template <typename ContainerAllocator>
+struct UbloxSerializer<ublox_msgs::msg::MgaACK_<ContainerAllocator> > {
+  inline static void read(const uint8_t *data, uint32_t count,
+                          ublox_msgs::msg::MgaACK_<ContainerAllocator> &m) {
+    UbloxIStream stream(const_cast<uint8_t *>(data), count);
+    stream.next(m.type);
+    stream.next(m.version);
+    stream.next(m.info_code);
+    stream.next(m.msg_id);
+    stream.next(m.msg_payload_start[0]);
+    stream.next(m.msg_payload_start[1]);
+    stream.next(m.msg_payload_start[2]);
+    stream.next(m.msg_payload_start[3]);
+  }
+
+  inline static uint32_t serializedLength(const ublox_msgs::msg::MgaACK_<ContainerAllocator> &m) {
+    (void)m;
+    return 8;
+  }
+
+  inline static void write(uint8_t *data, uint32_t size,
+                           const ublox_msgs::msg::MgaACK_<ContainerAllocator> &m) {
+    UbloxOStream stream(data, size);
+    stream.next(m.type);
+    stream.next(m.version);
+    stream.next(m.info_code);
+    stream.next(m.msg_id);
+    stream.next(m.msg_payload_start[0]);
+    stream.next(m.msg_payload_start[1]);
+    stream.next(m.msg_payload_start[2]);
+    stream.next(m.msg_payload_start[3]);
+  }
+};
+
+///
 /// @brief Serializes the AidALM message which has a repeated block.
 ///
 template <typename ContainerAllocator>
@@ -2746,7 +2783,7 @@ struct UbloxSerializer<ublox_msgs::msg::RxmSFRBX_<ContainerAllocator> > {
     UbloxIStream stream(const_cast<uint8_t *>(data), count);
     stream.next(m.gnss_id);
     stream.next(m.sv_id);
-    stream.next(m.reserved0);
+    stream.next(m.sig_id);
     stream.next(m.freq_id);
     stream.next(m.num_words);
     stream.next(m.chn);
@@ -2770,7 +2807,7 @@ struct UbloxSerializer<ublox_msgs::msg::RxmSFRBX_<ContainerAllocator> > {
     UbloxOStream stream(data, size);
     stream.next(m.gnss_id);
     stream.next(m.sv_id);
-    stream.next(m.reserved0);
+    stream.next(m.sig_id);
     stream.next(m.freq_id);
     stream.next(static_cast<typename ublox_msgs::msg::RxmSFRBX_<ContainerAllocator>::_num_words_type>(m.dwrd.size()));
     stream.next(m.chn);

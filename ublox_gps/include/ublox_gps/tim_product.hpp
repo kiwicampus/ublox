@@ -9,7 +9,6 @@
 #include <sensor_msgs/msg/time_reference.hpp>
 
 #include <ublox_msgs/msg/rxm_rawx.hpp>
-#include <ublox_msgs/msg/rxm_sfrbx.hpp>
 #include <ublox_msgs/msg/tim_tm2.hpp>
 
 #include <ublox_gps/component_interface.hpp>
@@ -46,7 +45,7 @@ class TimProduct final : public virtual ComponentInterface {
   /**
    * @brief Subscribe to Time Sync messages.
    *
-   * @details Subscribes to RxmRAWX & RxmSFRBX messages.
+   * @details Subscribes to RxmRAWX messages.
    */
   void subscribe(std::shared_ptr<ublox_gps::Gps> gps) override;
 
@@ -61,7 +60,6 @@ class TimProduct final : public virtual ComponentInterface {
 
   rclcpp::Publisher<ublox_msgs::msg::TimTM2>::SharedPtr timtm2_pub_;
   rclcpp::Publisher<sensor_msgs::msg::TimeReference>::SharedPtr interrupt_time_pub_;
-  rclcpp::Publisher<ublox_msgs::msg::RxmSFRBX>::SharedPtr rxm_sfrb_pub_;
   rclcpp::Publisher<ublox_msgs::msg::RxmRAWX>::SharedPtr rxm_raw_pub_;
 
   std::string frame_id_;
